@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Slide 9 Preview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f172a; color: #e2e8f0;
+    height: 100vh; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .tabs {
+    display: flex; background: #1e293b;
+    border-bottom: 1px solid #334155;
+    flex-shrink: 0; padding: 0 24px;
+  }
+  .tab {
+    padding: 12px 20px; font-size: 13px; font-weight: 600;
+    color: #64748b; cursor: pointer;
+    border-bottom: 2px solid transparent; transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tab.active { color: #a78bfa; border-bottom-color: #7c3aed; }
+  .slide { display: none; flex: 1; }
+  .slide.active { display: flex; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.92); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  /* ── A1: Confident bold ── */
+  .a1 {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 60px 80px;
+    background: linear-gradient(160deg, #1e1035 0%, #0f172a 55%, #0c1226 100%);
+    position: relative; overflow: hidden;
+  }
+  .a1::before {
+    content: '';
+    position: absolute;
+    width: 700px; height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,58,237,0.18) 0%, transparent 70%);
+    top: -200px; left: 50%; transform: translateX(-50%);
+    pointer-events: none;
+  }
+  .a1-logo {
+    width: 64px; height: 64px; border-radius: 16px;
+    overflow: hidden; margin-bottom: 36px;
+    box-shadow: 0 8px 32px rgba(124,58,237,0.4);
+    animation: scaleIn 0.5s ease forwards;
+    flex-shrink: 0;
+  }
+  .a1-logo img { width: 100%; height: 100%; object-fit: contain; }
+  .a1 h1 {
+    font-size: 54px; font-weight: 900; color: #fff;
+    line-height: 1.1; letter-spacing: -0.025em;
+    margin-bottom: 20px;
+    animation: fadeUp 0.5s ease 0.15s both;
+  }
+  .a1 h1 em { font-style: normal; color: #a78bfa; }
+  .a1 p {
+    font-size: 19px; color: rgba(255,255,255,0.5);
+    line-height: 1.6; max-width: 440px;
+    animation: fadeUp 0.5s ease 0.3s both;
+  }
+
+  /* ── A2: Minimal dramatic ── */
+  .a2 {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 60px 80px;
+    background: #0f172a;
+    position: relative; overflow: hidden;
+  }
+  .a2-ring {
+    position: absolute;
+    width: 600px; height: 600px; border-radius: 50%;
+    border: 1px solid rgba(124,58,237,0.12);
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+  }
+  .a2-ring2 {
+    position: absolute;
+    width: 400px; height: 400px; border-radius: 50%;
+    border: 1px solid rgba(124,58,237,0.18);
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+  }
+  .a2-ring3 {
+    position: absolute;
+    width: 220px; height: 220px; border-radius: 50%;
+    border: 1px solid rgba(124,58,237,0.25);
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 70%);
+  }
+  .a2-content { position: relative; z-index: 2; }
+  .a2-logo {
+    width: 60px; height: 60px; border-radius: 14px;
+    overflow: hidden; margin: 0 auto 28px;
+    box-shadow: 0 0 40px rgba(124,58,237,0.5);
+    animation: scaleIn 0.5s ease forwards;
+  }
+  .a2-logo img { width: 100%; height: 100%; object-fit: contain; }
+  .a2 h1 {
+    font-size: 58px; font-weight: 900; color: #fff;
+    line-height: 1.05; letter-spacing: -0.03em;
+    margin-bottom: 16px;
+    animation: fadeUp 0.5s ease 0.15s both;
+  }
+  .a2 p {
+    font-size: 18px; color: #64748b;
+    animation: fadeUp 0.5s ease 0.3s both;
+  }
+
+  /* ── B1: "That's Veras." — ultra minimal ── */
+  .b1 {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 60px 80px;
+    background: linear-gradient(135deg, #0f172a 0%, #1a0f2e 100%);
+  }
+  .b1-logo {
+    width: 80px; height: 80px; border-radius: 20px;
+    overflow: hidden; margin-bottom: 40px;
+    box-shadow: 0 12px 48px rgba(124,58,237,0.35);
+    animation: scaleIn 0.6s ease forwards;
+    flex-shrink: 0;
+  }
+  .b1-logo img { width: 100%; height: 100%; object-fit: contain; }
+  .b1 h1 {
+    font-size: 64px; font-weight: 900; color: #fff;
+    line-height: 1.0; letter-spacing: -0.03em;
+    margin-bottom: 20px;
+    animation: fadeUp 0.5s ease 0.2s both;
+  }
+  .b1 h1 span {
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .b1 p {
+    font-size: 20px; color: rgba(255,255,255,0.45);
+    line-height: 1.6; max-width: 400px;
+    animation: fadeUp 0.5s ease 0.35s both;
+  }
+
+  /* ── B2: Warm recap ── */
+  .b2 {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 60px 80px;
+    background: #0f172a;
+  }
+  .b2-logo {
+    width: 64px; height: 64px; border-radius: 16px;
+    overflow: hidden; margin-bottom: 32px;
+    box-shadow: 0 8px 32px rgba(124,58,237,0.3);
+    animation: scaleIn 0.5s ease forwards; flex-shrink: 0;
+  }
+  .b2-logo img { width: 100%; height: 100%; object-fit: contain; }
+  .b2 h1 {
+    font-size: 42px; font-weight: 800; color: #fff;
+    line-height: 1.15; margin-bottom: 16px;
+    animation: fadeUp 0.5s ease 0.15s both;
+  }
+  .b2 p {
+    font-size: 19px; color: #94a3b8; line-height: 1.7;
+    max-width: 500px; margin-bottom: 36px;
+    animation: fadeUp 0.5s ease 0.3s both;
+  }
+  .b2-pills {
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+    animation: fadeUp 0.5s ease 0.45s both;
+  }
+  .b2-pill {
+    background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.25);
+    border-radius: 99px; padding: 7px 16px;
+    font-size: 13px; font-weight: 600; color: #a78bfa;
+  }
+
+  .dots {
+    position: fixed; bottom: 28px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 7px; align-items: center;
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.18); }
+  .dot.active { background: #7c3aed; width: 22px; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div class="tabs">
+  <div class="tab active"   onclick="show('a1',0)">A1 — Bold statement</div>
+  <div class="tab"          onclick="show('a2',1)">A2 — Rings / minimal</div>
+  <div class="tab"          onclick="show('b1',2)">B1 — "That's Veras."</div>
+  <div class="tab"          onclick="show('b2',3)">B2 — Warm recap</div>
+</div>
+
+<!-- A1 -->
+<div class="slide active" id="slide-a1">
+  <div class="a1">
+    <div class="a1-logo"><img src="public/veras-app-icon.svg" /></div>
+    <h1>Your community is about to<br>run <em>differently.</em></h1>
+    <p>See you at onboarding — we'll build it all out live, in your system, with your team.</p>
+  </div>
+</div>
+
+<!-- A2 -->
+<div class="slide" id="slide-a2">
+  <div class="a2">
+    <div class="a2-ring"></div>
+    <div class="a2-ring2"></div>
+    <div class="a2-ring3"></div>
+    <div class="a2-content">
+      <div class="a2-logo"><img src="public/veras-app-icon.svg" /></div>
+      <h1>This is what modern<br>scheduling looks like.</h1>
+      <p>See you at onboarding.</p>
+    </div>
+  </div>
+</div>
+
+<!-- B1 -->
+<div class="slide" id="slide-b1">
+  <div class="b1">
+    <div class="b1-logo"><img src="public/veras-app-icon.svg" /></div>
+    <h1><span>That's</span> Veras.</h1>
+    <p>Everything you just saw is ready for your community. We'll see you at onboarding.</p>
+  </div>
+</div>
+
+<!-- B2 -->
+<div class="slide" id="slide-b2">
+  <div class="b2">
+    <div class="b2-logo"><img src="public/veras-app-icon.svg" /></div>
+    <h1>Everything your team needs.<br>All in one place.</h1>
+    <p>Scheduling, analytics, team management, messaging, and AI Suggestions — built for senior living, ready for your community.</p>
+    <div class="b2-pills">
+      <div class="b2-pill">Scheduling</div>
+      <div class="b2-pill">Analytics</div>
+      <div class="b2-pill">Team</div>
+      <div class="b2-pill">Messages</div>
+      <div class="b2-pill">AI Suggestions</div>
+    </div>
+  </div>
+</div>
+
+<div class="dots">
+  <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  <div class="dot"></div><div class="dot"></div><div class="dot active"></div>
+</div>
+
+<script>
+function show(id, idx) {
+  document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'))
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+  document.getElementById('slide-' + id).classList.add('active')
+  document.querySelectorAll('.tab')[idx].classList.add('active')
+}
+</script>
+</body>
+</html>
