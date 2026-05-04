@@ -436,6 +436,9 @@ function StepsSlide({ slide }) {
 }
 
 function HotspotSlide({ slide }) {
+  const views = slide.views || []
+  const hasViews = views.length > 1
+  const [activeView, setActiveView] = useState(0)
   const [activeIdx, setActiveIdx] = useState(null)
   const [viewed, setViewed] = useState(new Set())
   const [scale, setScale] = useState(1)
@@ -443,8 +446,20 @@ function HotspotSlide({ slide }) {
   const [dragging, setDragging] = useState(false)
   const dragStart = useRef(null)
   const wrapRef = useRef(null)
-  const hotspots = slide.hotspots || []
+
+  const currentView = hasViews ? views[activeView] : null
+  const hotspots = (currentView ? currentView.hotspots : slide.hotspots) || []
+  const imageUrl = currentView ? currentView.imageUrl : slide.imageUrl
+  const viewDescription = currentView ? currentView.description : (slide.body || 'Click each pin to explore.')
   const activeHotspot = activeIdx !== null ? hotspots[activeIdx] : null
+
+  function switchView(i) {
+    setActiveView(i)
+    setActiveIdx(null)
+    setViewed(new Set())
+    setScale(1)
+    setOffset({ x: 0, y: 0 })
+  }
 
   useEffect(() => {
     const el = wrapRef.current
@@ -504,12 +519,33 @@ function HotspotSlide({ slide }) {
       onMouseLeave={onMouseUp}
     >
       <div style={{
-        flexShrink: 0, padding: '12px 24px 10px', textAlign: 'center',
+        flexShrink: 0, padding: '10px 24px 10px', textAlign: 'center',
         background: 'var(--c-bg)', borderBottom: '1px solid var(--c-border)',
       }}>
-        <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--c-text)', marginBottom: 3 }}>{slide.title}</h2>
+        <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--c-text)', marginBottom: hasViews ? 8 : 3 }}>{slide.title}</h2>
+
+        {hasViews && (
+          <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginBottom: 8 }}>
+            {views.map((v, i) => (
+              <button
+                key={v._key || i}
+                onClick={() => switchView(i)}
+                style={{
+                  padding: '4px 16px', borderRadius: 99, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                  background: activeView === i ? '#7c3aed' : 'transparent',
+                  color: activeView === i ? '#fff' : '#64748b',
+                  border: `1.5px solid ${activeView === i ? '#7c3aed' : 'var(--c-border)'}`,
+                  transition: 'all 0.15s',
+                }}
+              >
+                {v.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         <p style={{ fontSize: 12, color: '#64748b' }}>
-          {slide.body || 'Click each pin to explore.'}
+          {viewDescription}
           {hotspots.length > 0 && (
             <span style={{ marginLeft: 8, fontWeight: 600, color: viewed.size === hotspots.length ? '#059669' : '#94a3b8' }}>
               {viewed.size === hotspots.length ? 'All explored ✓' : `${viewed.size}/${hotspots.length} explored`}
@@ -528,16 +564,16 @@ function HotspotSlide({ slide }) {
           transformOrigin: 'center center',
           transition: dragging ? 'none' : 'transform 0.12s ease',
         }}>
-          {slide.imageUrl && (
+          {imageUrl && (
             <img
-              src={slide.imageUrl}
+              src={imageUrl}
               alt={slide.title}
               draggable={false}
               onClick={e => { if (!activeHotspot) return; e.stopPropagation(); closeHotspot() }}
               style={{
                 display: 'block',
                 maxWidth: 'calc(100vw - 128px)',
-                maxHeight: 'calc(100vh - 220px)',
+                maxHeight: 'calc(100vh - 240px)',
                 width: 'auto', height: 'auto',
                 borderRadius: 8, border: '1px solid #334155',
                 boxShadow: '0 6px 40px rgba(0,0,0,0.3)', userSelect: 'none',
