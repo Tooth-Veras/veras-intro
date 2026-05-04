@@ -8,6 +8,7 @@ const TYPE_MAP = {
   hotspotSlide: 'hotspot',
   checklistSlide: 'checklist',
   badgeSlide: 'badge',
+  supportSlide: 'support',
 }
 
 function transformSlide(slide) {

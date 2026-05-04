@@ -654,6 +654,73 @@ function HotspotSlide({ slide }) {
   )
 }
 
+function SupportSlide() {
+  const { isDark } = useTheme()
+
+  const bg = isDark ? '#0f172a' : '#f8fafc'
+  const headlineColor = isDark ? '#fff' : '#0f172a'
+  const subColor = '#64748b'
+  const ringColor = isDark ? 'rgba(124,58,237,0.1)' : 'rgba(124,58,237,0.08)'
+  const channelNameColor = isDark ? '#fff' : '#0f172a'
+  const channelValColor = '#64748b'
+  const dividerColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)'
+  const promiseBg = isDark ? 'rgba(124,58,237,0.08)' : 'rgba(124,58,237,0.05)'
+  const promiseBorder = isDark ? 'rgba(124,58,237,0.18)' : 'rgba(124,58,237,0.15)'
+  const promiseColor = isDark ? 'rgba(255,255,255,0.5)' : '#475569'
+
+  const channel = (emoji, bg2, glow, border, name, val) => (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+      <div style={{
+        width: 64, height: 64, borderRadius: 18,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 28, background: bg2, boxShadow: glow, border,
+      }}>{emoji}</div>
+      <div style={{ fontSize: 13, fontWeight: 700, color: channelNameColor }}>{name}</div>
+      <div style={{ fontSize: 12, color: channelValColor }}>{val}</div>
+    </div>
+  )
+
+  return (
+    <div style={{
+      flex: 1, display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      padding: '48px 80px 64px', background: bg,
+      textAlign: 'center', position: 'relative', overflow: 'hidden',
+    }}>
+      <div style={{ position: 'absolute', width: 640, height: 640, borderRadius: '50%', border: `1px solid ${ringColor}`, top: '50%', left: '50%', transform: 'translate(-50%, -50%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', border: `1px solid ${ringColor}`, top: '50%', left: '50%', transform: 'translate(-50%, -50%)', pointerEvents: 'none' }} />
+
+      <h2 style={{ fontSize: 50, fontWeight: 900, lineHeight: 1.07, letterSpacing: '-0.03em', marginBottom: 12, position: 'relative', zIndex: 1, color: headlineColor }}>
+        Real support,<br />
+        <span style={{ background: 'linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          real people.
+        </span>
+      </h2>
+
+      <p style={{ fontSize: 17, color: subColor, lineHeight: 1.6, maxWidth: 480, marginBottom: 52, position: 'relative', zIndex: 1 }}>
+        Veras includes dedicated support from our team — available in-app, by email, and in a full help center built for you.
+      </p>
+
+      <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
+        {channel('💬', 'linear-gradient(135deg,rgba(124,58,237,0.25),rgba(124,58,237,0.1))', '0 0 32px rgba(124,58,237,0.25)', '1px solid rgba(124,58,237,0.3)', 'Live Chat', 'Inside Veras')}
+        <div style={{ width: 1, height: 64, background: dividerColor, alignSelf: 'center' }} />
+        {channel('✉️', 'linear-gradient(135deg,rgba(16,185,129,0.2),rgba(16,185,129,0.05))', '0 0 32px rgba(16,185,129,0.15)', '1px solid rgba(16,185,129,0.25)', 'Email', 'support@veras.com')}
+        <div style={{ width: 1, height: 64, background: dividerColor, alignSelf: 'center' }} />
+        {channel('📚', 'linear-gradient(135deg,rgba(59,130,246,0.2),rgba(59,130,246,0.05))', '0 0 32px rgba(59,130,246,0.12)', '1px solid rgba(59,130,246,0.25)', 'Help Center', 'help.veras.com')}
+      </div>
+
+      <div style={{
+        marginTop: 44, background: promiseBg, border: `1px solid ${promiseBorder}`,
+        borderRadius: 12, padding: '14px 28px',
+        fontSize: 14, color: promiseColor, lineHeight: 1.5, maxWidth: 480,
+        position: 'relative', zIndex: 1,
+      }}>
+        <strong style={{ color: '#a78bfa', fontWeight: 600 }}>White-glove from day one.</strong> Our onboarding team sets everything up with you — and stays available long after launch.
+      </div>
+    </div>
+  )
+}
+
 function ChecklistSlide({ slide, checked, onToggle }) {
   return (
     <div style={{
@@ -732,6 +799,7 @@ function renderSlide(slide, checked, onToggle) {
     case 'statement':  return <StatementSlide slide={slide} />
     case 'steps':      return <StepsSlide slide={slide} />
     case 'hotspot':    return <HotspotSlide slide={slide} />
+    case 'support':    return <SupportSlide />
     case 'checklist':  return <ChecklistSlide slide={slide} checked={checked} onToggle={onToggle} />
     case 'badge':      return <BadgeSlide slide={slide} />
     default:           return <TextImageSlide slide={slide} />
