@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Support Slide Preview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f172a; color: #e2e8f0;
+    height: 100vh; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .tabs {
+    display: flex; background: #1e293b;
+    border-bottom: 1px solid #334155;
+    flex-shrink: 0; padding: 0 24px;
+  }
+  .tab {
+    padding: 12px 20px; font-size: 13px; font-weight: 600;
+    color: #64748b; cursor: pointer;
+    border-bottom: 2px solid transparent; transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tab.active { color: #a78bfa; border-bottom-color: #7c3aed; }
+  .slide { display: none; flex: 1; overflow: hidden; }
+  .slide.active { display: flex; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.88); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-16px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ─────────────────────────────────────────
+     A1: Three channels, centered, cards
+  ───────────────────────────────────────── */
+  .a1-wrap {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 48px 80px 60px;
+    background: linear-gradient(160deg, #1e1035 0%, #0f172a 60%, #0c1226 100%);
+    position: relative; overflow: hidden;
+    gap: 0;
+  }
+  .a1-wrap::before {
+    content: '';
+    position: absolute;
+    width: 700px; height: 700px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 70%);
+    top: -220px; left: 50%; transform: translateX(-50%);
+    pointer-events: none;
+  }
+  .a1-eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: #7c3aed;
+    margin-bottom: 14px;
+    animation: fadeUp 0.4s ease both;
+  }
+  .a1-title {
+    font-size: 46px; font-weight: 900; color: #fff;
+    line-height: 1.08; letter-spacing: -0.025em;
+    margin-bottom: 14px;
+    animation: fadeUp 0.45s ease 0.1s both;
+    position: relative; z-index: 1;
+  }
+  .a1-title em { font-style: normal; color: #a78bfa; }
+  .a1-sub {
+    font-size: 17px; color: rgba(255,255,255,0.48);
+    line-height: 1.6; max-width: 460px; margin-bottom: 44px;
+    animation: fadeUp 0.45s ease 0.2s both;
+    position: relative; z-index: 1;
+  }
+  .a1-cards {
+    display: flex; gap: 16px; width: 100%; max-width: 860px;
+    animation: fadeUp 0.5s ease 0.3s both;
+    position: relative; z-index: 1;
+  }
+  .a1-card {
+    flex: 1; background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px; padding: 28px 24px 24px;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    text-align: center;
+    transition: border-color 0.2s, background 0.2s;
+    cursor: default;
+  }
+  .a1-card:hover {
+    border-color: rgba(124,58,237,0.4);
+    background: rgba(124,58,237,0.06);
+  }
+  .a1-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .a1-icon.purple { background: rgba(124,58,237,0.15); }
+  .a1-icon.green  { background: rgba(16,185,129,0.12); }
+  .a1-icon.blue   { background: rgba(59,130,246,0.12); }
+  .a1-card-label {
+    font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 0.01em;
+  }
+  .a1-card-value {
+    font-size: 12.5px; color: #94a3b8; line-height: 1.5;
+  }
+  .a1-card-link {
+    font-size: 12px; font-weight: 600;
+    color: #a78bfa; text-decoration: none;
+    background: rgba(124,58,237,0.12);
+    border-radius: 6px; padding: 5px 12px;
+    margin-top: 4px;
+  }
+
+  /* ─────────────────────────────────────────
+     A2: Left text + right stacked cards
+  ───────────────────────────────────────── */
+  .a2-wrap {
+    flex: 1; display: flex; flex-direction: row;
+    background: #0f172a;
+    overflow: hidden;
+  }
+  .a2-left {
+    flex: 0 0 420px; display: flex; flex-direction: column;
+    justify-content: center; padding: 64px 56px;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    background: linear-gradient(180deg, #150d28 0%, #0f172a 100%);
+    position: relative; overflow: hidden;
+  }
+  .a2-left::before {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,58,237,0.2) 0%, transparent 70%);
+    bottom: -120px; left: -80px;
+    pointer-events: none;
+  }
+  .a2-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(124,58,237,0.12); border: 1px solid rgba(124,58,237,0.25);
+    border-radius: 99px; padding: 5px 14px;
+    font-size: 11px; font-weight: 700; color: #a78bfa;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 24px; width: fit-content;
+    animation: fadeUp 0.4s ease both;
+    position: relative; z-index: 1;
+  }
+  .a2-title {
+    font-size: 40px; font-weight: 900; color: #fff;
+    line-height: 1.1; letter-spacing: -0.025em;
+    margin-bottom: 16px;
+    animation: fadeUp 0.45s ease 0.1s both;
+    position: relative; z-index: 1;
+  }
+  .a2-title span { color: #a78bfa; }
+  .a2-body {
+    font-size: 16px; color: #64748b; line-height: 1.65;
+    animation: fadeUp 0.45s ease 0.2s both;
+    position: relative; z-index: 1;
+  }
+  .a2-right {
+    flex: 1; display: flex; flex-direction: column;
+    justify-content: center; padding: 48px 48px 48px 52px;
+    gap: 14px;
+  }
+  .a2-row {
+    display: flex; align-items: center; gap: 20px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px; padding: 22px 24px;
+    transition: border-color 0.2s, background 0.2s;
+    cursor: default;
+  }
+  .a2-row:hover {
+    border-color: rgba(124,58,237,0.35);
+    background: rgba(124,58,237,0.05);
+  }
+  .a2-row:nth-child(1) { animation: slideIn 0.4s ease 0.2s both; }
+  .a2-row:nth-child(2) { animation: slideIn 0.4s ease 0.32s both; }
+  .a2-row:nth-child(3) { animation: slideIn 0.4s ease 0.44s both; }
+  .a2-row-icon {
+    width: 44px; height: 44px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .a2-row-icon.v { background: rgba(124,58,237,0.15); }
+  .a2-row-icon.g { background: rgba(16,185,129,0.12); }
+  .a2-row-icon.b { background: rgba(59,130,246,0.12); }
+  .a2-row-text { flex: 1; }
+  .a2-row-label { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+  .a2-row-desc  { font-size: 13px; color: #64748b; line-height: 1.4; }
+  .a2-row-link  {
+    font-size: 12px; font-weight: 600; color: #a78bfa;
+    background: rgba(124,58,237,0.1); border-radius: 6px;
+    padding: 5px 12px; white-space: nowrap; flex-shrink: 0;
+  }
+
+  /* ─────────────────────────────────────────
+     B1: Centered, minimal, icon-forward
+  ───────────────────────────────────────── */
+  .b1-wrap {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 48px 80px 64px;
+    background: #0f172a;
+    text-align: center; gap: 0;
+    position: relative; overflow: hidden;
+  }
+  .b1-ring {
+    position: absolute;
+    border-radius: 50%; border: 1px solid rgba(124,58,237,0.1);
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .b1-headline {
+    font-size: 50px; font-weight: 900; color: #fff;
+    line-height: 1.07; letter-spacing: -0.03em;
+    margin-bottom: 12px;
+    animation: fadeUp 0.5s ease both;
+    position: relative; z-index: 1;
+  }
+  .b1-headline span {
+    background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .b1-sub {
+    font-size: 17px; color: #64748b; line-height: 1.6;
+    max-width: 480px; margin-bottom: 52px;
+    animation: fadeUp 0.5s ease 0.12s both;
+    position: relative; z-index: 1;
+  }
+  .b1-channels {
+    display: flex; gap: 32px; align-items: flex-start;
+    animation: fadeUp 0.5s ease 0.25s both;
+    position: relative; z-index: 1;
+  }
+  .b1-channel { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .b1-channel-icon {
+    width: 64px; height: 64px; border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    position: relative;
+  }
+  .b1-channel-icon.pur {
+    background: linear-gradient(135deg, rgba(124,58,237,0.25), rgba(124,58,237,0.1));
+    box-shadow: 0 0 32px rgba(124,58,237,0.25);
+    border: 1px solid rgba(124,58,237,0.3);
+  }
+  .b1-channel-icon.grn {
+    background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(16,185,129,0.05));
+    box-shadow: 0 0 32px rgba(16,185,129,0.15);
+    border: 1px solid rgba(16,185,129,0.25);
+  }
+  .b1-channel-icon.blu {
+    background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(59,130,246,0.05));
+    box-shadow: 0 0 32px rgba(59,130,246,0.12);
+    border: 1px solid rgba(59,130,246,0.25);
+  }
+  .b1-channel-sep {
+    width: 1px; height: 64px; background: rgba(255,255,255,0.07);
+    margin-top: 0; align-self: center;
+  }
+  .b1-channel-name { font-size: 13px; font-weight: 700; color: #fff; }
+  .b1-channel-val  { font-size: 12px; color: #64748b; }
+  .b1-promise {
+    margin-top: 44px;
+    background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.18);
+    border-radius: 12px; padding: 14px 28px;
+    font-size: 14px; color: rgba(255,255,255,0.5); line-height: 1.5;
+    max-width: 480px;
+    animation: fadeUp 0.5s ease 0.38s both;
+    position: relative; z-index: 1;
+  }
+  .b1-promise strong { color: #a78bfa; font-weight: 600; }
+
+  /* ─────────────────────────────────────────
+     B2: Bold dark — "You're never on your own"
+  ───────────────────────────────────────── */
+  .b2-wrap {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 48px 80px 60px;
+    background: linear-gradient(145deg, #0f0a1e 0%, #0f172a 50%, #061020 100%);
+    position: relative; overflow: hidden;
+    text-align: center; gap: 0;
+  }
+  .b2-glow1 {
+    position: absolute; width: 500px; height: 500px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%);
+    top: -160px; right: -80px; pointer-events: none;
+  }
+  .b2-glow2 {
+    position: absolute; width: 400px; height: 400px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(16,185,129,0.06) 0%, transparent 70%);
+    bottom: -120px; left: -60px; pointer-events: none;
+  }
+  .b2-kicker {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: #7c3aed;
+    margin-bottom: 16px;
+    animation: fadeUp 0.4s ease both;
+    position: relative; z-index: 1;
+  }
+  .b2-headline {
+    font-size: 52px; font-weight: 900; color: #fff;
+    line-height: 1.07; letter-spacing: -0.03em;
+    margin-bottom: 12px;
+    animation: fadeUp 0.45s ease 0.08s both;
+    position: relative; z-index: 1;
+  }
+  .b2-sub {
+    font-size: 17px; color: rgba(255,255,255,0.4);
+    max-width: 440px; line-height: 1.6; margin-bottom: 48px;
+    animation: fadeUp 0.45s ease 0.16s both;
+    position: relative; z-index: 1;
+  }
+  .b2-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 12px; max-width: 780px; width: 100%;
+    animation: fadeUp 0.5s ease 0.26s both;
+    position: relative; z-index: 1;
+  }
+  .b2-tile {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px; padding: 28px 20px 22px;
+    display: flex; flex-direction: column; align-items: center; gap: 11px;
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .b2-tile:hover {
+    transform: translateY(-2px);
+    background: rgba(255,255,255,0.05);
+  }
+  .b2-tile-ring {
+    width: 54px; height: 54px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; position: relative;
+  }
+  .b2-tile-ring.a {
+    background: rgba(124,58,237,0.1);
+    box-shadow: 0 0 0 1px rgba(124,58,237,0.25), 0 0 24px rgba(124,58,237,0.15);
+  }
+  .b2-tile-ring.b {
+    background: rgba(16,185,129,0.08);
+    box-shadow: 0 0 0 1px rgba(16,185,129,0.2), 0 0 24px rgba(16,185,129,0.1);
+  }
+  .b2-tile-ring.c {
+    background: rgba(59,130,246,0.08);
+    box-shadow: 0 0 0 1px rgba(59,130,246,0.2), 0 0 24px rgba(59,130,246,0.1);
+  }
+  .b2-tile-name { font-size: 14px; font-weight: 700; color: #fff; }
+  .b2-tile-desc { font-size: 12.5px; color: #64748b; line-height: 1.45; text-align: center; }
+  .b2-tile-val  { font-size: 12px; font-weight: 600; color: #a78bfa; }
+
+  /* nav dots */
+  .dots {
+    position: fixed; bottom: 28px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 7px; align-items: center;
+    pointer-events: none;
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.18); }
+  .dot.active { background: #7c3aed; width: 22px; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div class="tabs">
+  <div class="tab active"  onclick="show('a1',0)">A1 — Cards centered</div>
+  <div class="tab"         onclick="show('a2',1)">A2 — Split layout</div>
+  <div class="tab"         onclick="show('b1',2)">B1 — Icon-forward</div>
+  <div class="tab"         onclick="show('b2',3)">B2 — Dark tiles</div>
+</div>
+
+<!-- ══════════════ A1 ══════════════ -->
+<div class="slide active" id="slide-a1">
+  <div class="a1-wrap">
+    <div class="a1-eyebrow">White-Glove Support</div>
+    <h1 class="a1-title">We're with you<br>every step of the way.</h1>
+    <p class="a1-sub">Questions, issues, or just getting started — our team is here however you need us.</p>
+    <div class="a1-cards">
+      <div class="a1-card">
+        <div class="a1-icon purple">💬</div>
+        <div class="a1-card-label">Live Chat</div>
+        <div class="a1-card-value">Chat with a real person inside Veras — or ask our AI Agent anytime.</div>
+        <div class="a1-card-link">Open in Veras</div>
+      </div>
+      <div class="a1-card">
+        <div class="a1-icon green">✉️</div>
+        <div class="a1-card-label">Email Support</div>
+        <div class="a1-card-value">Send us a message and we'll get back to you fast — usually same day.</div>
+        <div class="a1-card-link">support@veras.com</div>
+      </div>
+      <div class="a1-card">
+        <div class="a1-icon blue">📚</div>
+        <div class="a1-card-label">Help Center</div>
+        <div class="a1-card-value">Step-by-step guides, how-tos, and answers for admins and staff alike.</div>
+        <div class="a1-card-link">help.veras.com</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ A2 ══════════════ -->
+<div class="slide" id="slide-a2">
+  <div class="a2-wrap">
+    <div class="a2-left">
+      <div class="a2-badge">⭐ White-Glove Support</div>
+      <h1 class="a2-title">You're never<br>on your <span>own.</span></h1>
+      <p class="a2-body">Our team is standing by — in the app, in your inbox, and in a help center built specifically for senior living communities.</p>
+    </div>
+    <div class="a2-right">
+      <div class="a2-row">
+        <div class="a2-row-icon v">💬</div>
+        <div class="a2-row-text">
+          <div class="a2-row-label">Live Chat</div>
+          <div class="a2-row-desc">Reach a real person directly from inside Veras. Our AI Agent covers after-hours.</div>
+        </div>
+        <div class="a2-row-link">Chat in Veras</div>
+      </div>
+      <div class="a2-row">
+        <div class="a2-row-icon g">✉️</div>
+        <div class="a2-row-text">
+          <div class="a2-row-label">Email</div>
+          <div class="a2-row-desc">Send us a note at support@veras.com — expect a same-business-day reply.</div>
+        </div>
+        <div class="a2-row-link">support@veras.com</div>
+      </div>
+      <div class="a2-row">
+        <div class="a2-row-icon b">📚</div>
+        <div class="a2-row-text">
+          <div class="a2-row-label">Help Center</div>
+          <div class="a2-row-desc">66 articles for admins, 14 for staff, plus product update notes — all at help.veras.com.</div>
+        </div>
+        <div class="a2-row-link">help.veras.com</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ B1 ══════════════ -->
+<div class="slide" id="slide-b1">
+  <div class="b1-wrap">
+    <div class="b1-ring" style="width:640px;height:640px;"></div>
+    <div class="b1-ring" style="width:400px;height:400px;"></div>
+    <h1 class="b1-headline">Real support,<br><span>real people.</span></h1>
+    <p class="b1-sub">Veras includes dedicated support from our team — available in-app, by email, and in a full help center built for senior living.</p>
+    <div class="b1-channels">
+      <div class="b1-channel">
+        <div class="b1-channel-icon pur">💬</div>
+        <div class="b1-channel-name">Live Chat</div>
+        <div class="b1-channel-val">Inside Veras</div>
+      </div>
+      <div class="b1-channel-sep"></div>
+      <div class="b1-channel">
+        <div class="b1-channel-icon grn">✉️</div>
+        <div class="b1-channel-name">Email</div>
+        <div class="b1-channel-val">support@veras.com</div>
+      </div>
+      <div class="b1-channel-sep"></div>
+      <div class="b1-channel">
+        <div class="b1-channel-icon blu">📚</div>
+        <div class="b1-channel-name">Help Center</div>
+        <div class="b1-channel-val">help.veras.com</div>
+      </div>
+    </div>
+    <div class="b1-promise">
+      <strong>White-glove from day one.</strong> Our onboarding team sets everything up with you — and stays available long after launch.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ B2 ══════════════ -->
+<div class="slide" id="slide-b2">
+  <div class="b2-wrap">
+    <div class="b2-glow1"></div>
+    <div class="b2-glow2"></div>
+    <div class="b2-kicker">Support &amp; Success</div>
+    <h1 class="b2-headline">We don't disappear<br>after onboarding.</h1>
+    <p class="b2-sub">Every Veras community gets ongoing, white-glove support — from day one and beyond.</p>
+    <div class="b2-grid">
+      <div class="b2-tile">
+        <div class="b2-tile-ring a">💬</div>
+        <div class="b2-tile-name">Live Chat</div>
+        <div class="b2-tile-desc">Chat with our team directly inside Veras. Powered by Intercom — real humans, not just bots.</div>
+        <div class="b2-tile-val">Available in-app</div>
+      </div>
+      <div class="b2-tile">
+        <div class="b2-tile-ring b">✉️</div>
+        <div class="b2-tile-name">Email</div>
+        <div class="b2-tile-desc">Reach us anytime. We reply same business day — no ticket queue, no runaround.</div>
+        <div class="b2-tile-val">support@veras.com</div>
+      </div>
+      <div class="b2-tile">
+        <div class="b2-tile-ring c">📚</div>
+        <div class="b2-tile-name">Help Center</div>
+        <div class="b2-tile-desc">Step-by-step guides for every workflow — built for schedulers, admins, and staff members.</div>
+        <div class="b2-tile-val">help.veras.com</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="dots">
+  <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  <div class="dot active"></div>
+</div>
+
+<script>
+function show(id, idx) {
+  document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'))
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+  document.getElementById('slide-' + id).classList.add('active')
+  document.querySelectorAll('.tab')[idx].classList.add('active')
+}
+</script>
+</body>
+</html>

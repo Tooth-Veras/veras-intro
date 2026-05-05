@@ -59,6 +59,7 @@ function Lightbox({ src, alt, onClose }) {
         background: 'rgba(0,0,0,0.88)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         cursor: scale > 1 ? (dragging ? 'grabbing' : 'grab') : 'default',
+        animation: 'lightboxBdIn 0.22s ease both',
       }}
     >
       <img
@@ -77,6 +78,7 @@ function Lightbox({ src, alt, onClose }) {
           transition: dragging ? 'none' : 'transform 0.15s ease',
           userSelect: 'none',
           pointerEvents: 'auto',
+          animation: 'lightboxImgIn 0.35s cubic-bezier(0.34,1.4,0.64,1) both',
         }}
       />
       <div style={{
@@ -109,22 +111,56 @@ function renderBody(text) {
 }
 
 function CoverSlide({ slide }) {
+  const { isDark } = useTheme()
+  const parts = (slide.title || '').split('Veras')
+
   return (
     <div style={{
       flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      background: `linear-gradient(135deg, ${GRADIENT[0]}22, ${GRADIENT[1]}22)`,
-      padding: '60px 40px', textAlign: 'center',
+      position: 'relative', overflow: 'hidden', textAlign: 'center', padding: '60px 40px',
+      background: isDark ? 'linear-gradient(135deg, #1e1035 0%, #0f172a 100%)' : '#f8faff',
     }}>
-      <img src="/veras-app-icon.svg" alt="Veras" style={{ width: 120, height: 120, marginBottom: 32 }} />
-      <h1 style={{ fontSize: 42, fontWeight: 800, color: 'var(--c-text)', lineHeight: 1.15, marginBottom: 16, maxWidth: 600 }}>
-        {slide.title}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        backgroundImage: 'linear-gradient(rgba(124,58,237,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(124,58,237,0.06) 1px, transparent 1px)',
+        backgroundSize: '48px 48px',
+      }} />
+      <div style={{ position: 'absolute', width: 480, height: 480, borderRadius: '50%', background: isDark ? 'rgba(124,58,237,0.18)' : 'rgba(124,58,237,0.10)', top: -140, left: '50%', transform: 'translateX(-50%)', filter: 'blur(70px)', animation: 'orb1 12s ease-in-out infinite', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', width: 300, height: 300, borderRadius: '50%', background: isDark ? 'rgba(124,58,237,0.14)' : 'rgba(124,58,237,0.08)', bottom: -60, right: -60, filter: 'blur(70px)', animation: 'orb2 15s ease-in-out infinite', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', width: 240, height: 240, borderRadius: '50%', background: isDark ? 'rgba(139,92,246,0.12)' : 'rgba(139,92,246,0.06)', bottom: 80, left: -40, filter: 'blur(70px)', animation: 'orb3 10s ease-in-out infinite', pointerEvents: 'none' }} />
+      <img
+        src="/veras-icon-real.svg"
+        alt="Veras"
+        style={{
+          width: 100, height: 100,
+          position: 'relative', zIndex: 1,
+          marginBottom: 32,
+          borderRadius: 24,
+          boxShadow: '0 0 40px rgba(124,58,237,0.22), 0 20px 60px rgba(0,0,0,0.18)',
+          animation: 'iconIn 0.6s cubic-bezier(.34,1.56,.64,1) 0.2s both, float 4s ease-in-out 1s infinite',
+        }}
+      />
+      <h1 style={{
+        fontSize: 48, fontWeight: 900, lineHeight: 1.1, marginBottom: 14,
+        position: 'relative', zIndex: 1, letterSpacing: '-0.025em',
+        color: isDark ? '#fff' : '#0f172a',
+        animation: 'textIn 0.5s ease 0.5s both',
+      }}>
+        {parts[0]}<span style={{
+          background: 'linear-gradient(90deg, #7c3aed 0%, #a78bfa 30%, #7c3aed 50%, #a78bfa 70%, #7c3aed 100%)',
+          backgroundSize: '200% auto',
+          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+          animation: 'shimmer 3s linear 1.5s infinite',
+        }}>Veras</span>{parts[1]}
       </h1>
-      <p style={{ fontSize: 20, color: 'var(--c-sec)', lineHeight: 1.6, maxWidth: 520 }}>
+      <p style={{
+        fontSize: 18, lineHeight: 1.65, maxWidth: 440,
+        position: 'relative', zIndex: 1,
+        color: isDark ? 'rgba(255,255,255,0.55)' : '#64748b',
+        animation: 'textIn 0.5s ease 0.7s both',
+      }}>
         {slide.subtitle}
       </p>
-      <div style={{ marginTop: 40, display: 'flex', alignItems: 'center', gap: 8, color: '#94a3b8', fontSize: 14 }}>
-        <ChevronDown size={18} /> Scroll down or use ↓ to advance
-      </div>
     </div>
   )
 }
@@ -137,8 +173,8 @@ function TextImageSlide({ slide }) {
   if (hasScreenshot) {
     return (
       <div style={{
-        flex: 1, display: 'flex', flexDirection: 'column', padding: '36px 80px 100px',
-        maxWidth: 1100, margin: '0 auto', width: '100%', gap: 28,
+        flex: 1, display: 'flex', flexDirection: 'column', padding: '28px 80px 16px',
+        maxWidth: 1100, margin: '0 auto', width: '100%', gap: 20, overflow: 'hidden',
       }}>
         {lightboxOpen && <Lightbox src={slide.imageUrl} alt={slide.title} onClose={() => setLightboxOpen(false)} />}
         <div>
@@ -149,13 +185,13 @@ function TextImageSlide({ slide }) {
             {renderBody(slide.body)}
           </p>
         </div>
-        <div style={{ position: 'relative', display: 'inline-block', maxWidth: 820 }}>
+        <div style={{ position: 'relative', display: 'inline-block', maxWidth: 820, flex: 1, minHeight: 0 }}>
           <img
             src={slide.imageUrl}
             alt={slide.title}
             onClick={() => setLightboxOpen(true)}
             style={{
-              width: '100%', borderRadius: 12, border: `1px solid ${c.cardBorder}`,
+              width: '100%', maxHeight: '100%', borderRadius: 12, border: `1px solid ${c.cardBorder}`,
               boxShadow: '0 4px 24px rgba(0,0,0,0.12)', objectFit: 'contain',
               cursor: 'zoom-in', display: 'block',
             }}
@@ -191,35 +227,136 @@ function TextImageSlide({ slide }) {
   )
 }
 
+function FlipCard({ card, i, isDark, flipped, onFlip }) {
+  const [tilt, setTilt] = useState({ x: 0, y: 0 })
+  const [hovered, setHovered] = useState(false)
+  const cardRef = useRef(null)
+
+  function onMouseMove(e) {
+    if (flipped || !cardRef.current) return
+    const rect = cardRef.current.getBoundingClientRect()
+    const dx = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2)
+    const dy = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2)
+    setTilt({ x: dy * -7, y: dx * 9 })
+  }
+
+  return (
+    <div
+      ref={cardRef}
+      onMouseMove={onMouseMove}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => { setHovered(false); setTilt({ x: 0, y: 0 }) }}
+      onClick={() => onFlip(i)}
+      style={{
+        perspective: '1200px', cursor: 'pointer', height: '100%',
+        animation: `glassIn 0.5s cubic-bezier(.34,1.3,.64,1) ${i * 0.1 + 0.1}s both`,
+      }}
+    >
+      <div style={{
+        position: 'relative', width: '100%', height: '100%', minHeight: 140,
+        transformStyle: 'preserve-3d',
+        transform: flipped
+          ? 'rotateY(180deg)'
+          : `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)${hovered ? ' translateY(-6px)' : ''}`,
+        transition: flipped ? 'transform 0.55s cubic-bezier(.4,1.4,.6,1)' : 'transform 0.18s ease',
+      }}>
+        {/* Front */}
+        <div style={{
+          backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
+          background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.68)',
+          border: '1px solid rgba(255,255,255,0.9)',
+          borderRadius: 18, padding: '20px 22px',
+          display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 10,
+          backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
+          boxShadow: hovered
+            ? '0 20px 48px rgba(124,58,237,0.16), 0 4px 12px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9)'
+            : '0 2px 8px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)',
+          height: '100%', position: 'relative', overflow: 'hidden',
+          transition: 'box-shadow 0.2s',
+        }}>
+          <div style={{ fontSize: 32 }}>{card.emoji}</div>
+          <div style={{ fontWeight: 800, fontSize: 15, color: isDark ? '#fff' : '#0f172a', lineHeight: 1.3 }}>{card.title}</div>
+          <div style={{ fontSize: 13, color: isDark ? '#94a3b8' : '#64748b', lineHeight: 1.6 }}>{card.body}</div>
+          <div style={{
+            position: 'absolute', bottom: 10, right: 10,
+            fontSize: 11, fontWeight: 700, color: '#7c3aed', letterSpacing: '0.04em',
+            background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.25)',
+            borderRadius: 6, padding: '4px 10px',
+            animation: 'flipHint 3s ease-in-out 1s infinite',
+          }}>flip ↻</div>
+        </div>
+
+        {/* Back */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
+          transform: 'rotateY(180deg)',
+          borderRadius: 18, padding: '24px 22px',
+          background: 'linear-gradient(135deg, #6d28d9 0%, #4338ca 100%)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          justifyContent: 'center', textAlign: 'center', gap: 0,
+          boxShadow: '0 16px 48px rgba(109,40,217,0.4), inset 0 1px 0 rgba(255,255,255,0.15)',
+        }}>
+          {card.backStat ? (
+            <>
+              <div style={{
+                fontSize: 28, fontWeight: 700, color: '#fff', lineHeight: 1.15,
+                letterSpacing: '-0.01em', marginBottom: 8,
+              }}>{card.backStat}</div>
+              <div style={{ width: 28, height: 2, background: 'rgba(255,255,255,0.35)', borderRadius: 2, marginBottom: 10 }} />
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.82)', lineHeight: 1.6 }}>{card.backBody}</div>
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize: 36, marginBottom: 8 }}>{card.emoji}</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#fff', lineHeight: 1.3, marginBottom: 8 }}>{card.title}</div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.82)', lineHeight: 1.6 }}>{card.body}</div>
+            </>
+          )}
+          <div style={{
+            marginTop: 12, fontSize: 10, color: 'rgba(255,255,255,0.4)',
+            fontWeight: 600, letterSpacing: '0.04em',
+          }}>↩ click to flip back</div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function FeatureCardsSlide({ slide }) {
-  const c = useColors()
+  const { isDark } = useTheme()
+  const [flippedIdx, setFlippedIdx] = useState(null)
+
+  function handleFlip(i) {
+    setFlippedIdx(prev => prev === i ? null : i)
+  }
+
   return (
     <div style={{
-      flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      padding: '40px 80px 120px', maxWidth: 900, margin: '0 auto', width: '100%',
+      flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
+      position: 'relative', overflow: 'hidden',
+      background: isDark ? 'linear-gradient(135deg, #1e1035 0%, #0f172a 100%)' : 'linear-gradient(135deg, #ede9fe 0%, #f8fafc 40%, #e0f2fe 100%)',
     }}>
-      {slide.eyebrow && (
-        <div style={{ fontSize: 12, fontWeight: 700, color: '#7c3aed', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 12 }}>
-          {slide.eyebrow}
-        </div>
-      )}
-      <h2 style={{ fontSize: 36, fontWeight: 800, color: c.text, lineHeight: 1.2, marginBottom: 40, textAlign: 'center' }}>
-        {slide.title}
-      </h2>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, width: '100%' }}>
-        {(slide.cards || []).map((card, i) => (
-          <div key={card._key || i} style={{
-            background: 'var(--c-card)', border: `1px solid ${c.cardBorder}`,
-            borderRadius: 14, padding: '24px',
-            display: 'flex', gap: 16, alignItems: 'flex-start',
-          }}>
-            <div style={{ fontSize: 30, flexShrink: 0, lineHeight: 1.2 }}>{card.emoji}</div>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: 16, color: c.text, marginBottom: 6 }}>{card.title}</div>
-              <div style={{ fontSize: 14, color: c.textSec, lineHeight: 1.65 }}>{card.body}</div>
-            </div>
+      <div style={{ position: 'absolute', width: 500, height: 400, background: isDark ? 'rgba(124,58,237,0.18)' : 'rgba(124,58,237,0.12)', top: -120, left: -80, filter: 'blur(90px)', animation: 'liquidShift 8s ease-in-out infinite', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', width: 400, height: 350, background: isDark ? 'rgba(59,130,246,0.14)' : 'rgba(59,130,246,0.10)', bottom: -80, right: -80, filter: 'blur(90px)', animation: 'liquidShift 8s ease-in-out infinite', animationDelay: '-4s', pointerEvents: 'none' }} />
+      <div style={{
+        position: 'relative', zIndex: 1,
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        padding: '28px 80px 16px', maxWidth: 900, margin: '0 auto', width: '100%',
+      }}>
+        {slide.eyebrow && (
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#7c3aed', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 12 }}>
+            {slide.eyebrow}
           </div>
-        ))}
+        )}
+        <h2 style={{ fontSize: 30, fontWeight: 800, color: isDark ? '#fff' : '#0f172a', lineHeight: 1.2, marginBottom: 20, textAlign: 'center' }}>
+          {slide.title}
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridAutoRows: '1fr', gap: 12, width: '100%' }}>
+          {(slide.cards || []).map((card, i) => (
+            <FlipCard key={card._key || i} card={card} i={i} isDark={isDark} flipped={flippedIdx === i} onFlip={handleFlip} />
+          ))}
+        </div>
       </div>
     </div>
   )
@@ -229,12 +366,13 @@ function PhonesSlide({ slide }) {
   const c = useColors()
   const phones = slide.phones || []
   const rotations = [-4, 0, 4]
+  const [hoveredIdx, setHoveredIdx] = useState(null)
 
   return (
     <div style={{
       flex: 1, display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center',
-      padding: '40px 60px 80px', gap: 32, textAlign: 'center',
+      alignItems: 'center', justifyContent: 'flex-start',
+      padding: '24px 40px 16px', gap: 16, textAlign: 'center',
     }}>
       <div>
         {slide.eyebrow && (
@@ -251,64 +389,121 @@ function PhonesSlide({ slide }) {
           </p>
         )}
       </div>
-      <div style={{ display: 'flex', gap: 28, alignItems: 'flex-end', justifyContent: 'center' }}>
-        {phones.map((phone, i) => (
-          <div key={phone._key || i} style={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
-            transform: `rotate(${rotations[i] || 0}deg)`,
-            transition: 'transform 0.2s',
-          }}>
-            <img
-              src={phone.imageUrl}
-              alt={phone.label}
+      <div style={{ display: 'flex', gap: 20, alignItems: 'flex-end', justifyContent: 'center' }}>
+        {phones.map((phone, i) => {
+          const isHovered = hoveredIdx === i
+          const isOther = hoveredIdx !== null && !isHovered
+          return (
+            <div
+              key={phone._key || i}
+              onMouseEnter={() => setHoveredIdx(i)}
+              onMouseLeave={() => setHoveredIdx(null)}
               style={{
-                height: 340, width: 'auto',
-                borderRadius: 24,
-                boxShadow: '0 24px 60px rgba(0,0,0,0.5)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14,
+                transform: isHovered
+                  ? 'rotate(0deg) scale(1.24) translateY(-10px)'
+                  : isOther
+                    ? `rotate(${rotations[i] || 0}deg) scale(0.96)`
+                    : `rotate(${rotations[i] || 0}deg) scale(1)`,
+                transition: 'transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.3s ease',
+                opacity: isOther ? 0.72 : 1,
+                zIndex: isHovered ? 10 : 1,
+                cursor: 'zoom-in',
+                willChange: 'transform',
               }}
-            />
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#64748b', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-              {phone.label}
+            >
+              <img
+                src={phone.imageUrl}
+                alt={phone.label}
+                style={{
+                  height: 'min(370px, calc(100vh - 380px))', width: 'auto',
+                  borderRadius: 28,
+                  boxShadow: isHovered
+                    ? '0 40px 90px rgba(0,0,0,0.5), 0 0 0 1.5px rgba(124,58,237,0.25)'
+                    : '0 32px 80px rgba(0,0,0,0.45)',
+                  imageRendering: 'crisp-edges',
+                  transition: 'box-shadow 0.4s ease',
+                }}
+              />
+              <div style={{
+                fontSize: 13, fontWeight: 700,
+                color: isHovered ? '#7c3aed' : '#64748b',
+                letterSpacing: '0.06em', textTransform: 'uppercase',
+                transition: 'color 0.3s ease',
+              }}>
+                {phone.label}
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
+}
+
+const DRIFT_PARTICLES = [
+  { left: '12%', bottom: '18%', dx: '-28px', dur: '5.2s', delay: '0s',   size: 3 },
+  { left: '22%', bottom: '28%', dx:  '18px', dur: '6.1s', delay: '0.8s', size: 2 },
+  { left: '35%', bottom: '12%', dx: '-35px', dur: '4.8s', delay: '1.5s', size: 3 },
+  { left: '48%', bottom: '22%', dx:  '22px', dur: '5.7s', delay: '2.2s', size: 2 },
+  { left: '60%', bottom: '15%', dx: '-18px', dur: '6.4s', delay: '0.5s', size: 3 },
+  { left: '72%', bottom: '30%', dx:  '32px', dur: '5.0s', delay: '1.8s', size: 2 },
+  { left: '82%', bottom: '20%', dx: '-25px', dur: '4.6s', delay: '3.0s', size: 3 },
+  { left: '18%', bottom: '35%', dx:  '15px', dur: '7.2s', delay: '0.3s', size: 2 },
+  { left: '55%', bottom: '38%', dx: '-20px', dur: '5.5s', delay: '2.8s', size: 2 },
+  { left: '40%', bottom: '32%', dx:  '28px', dur: '6.8s', delay: '1.2s', size: 3 },
+  { left: '67%', bottom: '25%', dx: '-12px', dur: '5.3s', delay: '4.0s', size: 2 },
+  { left: '30%', bottom: '42%', dx:  '35px', dur: '4.9s', delay: '2.5s', size: 2 },
+]
+
+const CHIP_DETAILS = {
+  'Open shifts': 'Veras spots unfilled shifts in your schedule and surfaces them with a one-tap option to broadcast to staff phones or remove them to clean up your view.',
+  'Overstaffed': 'When a position exceeds your budget target, Veras flags it before it costs you — with a specific shift suggested for removal.',
+  'Budget optimization': 'Veras compares your scheduled hours against your PPD target and surfaces exactly which shifts to trim, before you go over.',
 }
 
 function StatementSlide({ slide }) {
   const c = useColors()
   const { isDark } = useTheme()
   const useDarkGradient = slide.gradientBg && isDark
+  const [activeChip, setActiveChip] = useState(null)
 
   const titleColor = useDarkGradient ? '#fff' : c.text
   const bodyColor = useDarkGradient ? 'rgba(255,255,255,0.6)' : c.textSec
 
   return (
     <div style={{
-      flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      position: 'relative',
+      flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
+      position: 'relative', overflow: 'hidden',
       background: useDarkGradient ? 'linear-gradient(160deg, #1e1035, #0f172a)' : 'transparent',
     }}>
-      {useDarkGradient && (
+      {slide.gradientBg && DRIFT_PARTICLES.map((p, i) => (
+        <div key={i} style={{
+          position: 'absolute', borderRadius: '50%', pointerEvents: 'none',
+          background: useDarkGradient ? 'rgba(167,139,250,0.5)' : 'rgba(124,58,237,0.35)',
+          width: p.size, height: p.size, left: p.left, bottom: p.bottom,
+          '--dx': p.dx,
+          animation: `particleDrift ${p.dur} ease-in ${p.delay} infinite`,
+        }} />
+      ))}
+      {slide.gradientBg && (
         <div style={{
           position: 'absolute', width: 600, height: 600, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(124,58,237,0.2) 0%, transparent 70%)',
+          background: `radial-gradient(circle, ${useDarkGradient ? 'rgba(124,58,237,0.2)' : 'rgba(124,58,237,0.07)'} 0%, transparent 70%)`,
           top: -150, left: '50%', transform: 'translateX(-50%)',
           pointerEvents: 'none',
         }} />
       )}
       <div style={{
         display: 'flex', flexDirection: 'column', alignItems: 'center',
-        padding: '60px 120px 100px', maxWidth: 860, width: '100%', textAlign: 'center',
+        padding: '28px 80px 16px', maxWidth: 860, width: '100%', textAlign: 'center',
         position: 'relative', zIndex: 1,
       }}>
         {slide.showLogo && (
-          <img src="/veras-app-icon.svg" alt="Veras" style={{ width: 64, height: 64, borderRadius: 16, marginBottom: 32, boxShadow: '0 8px 32px rgba(124,58,237,0.3)', flexShrink: 0 }} />
+          <img src="/veras-app-icon.svg" alt="Veras" style={{ width: 64, height: 64, borderRadius: 16, marginBottom: 32, boxShadow: '0 8px 32px rgba(124,58,237,0.3)', flexShrink: 0, animation: 'iconIn 0.5s cubic-bezier(.34,1.3,.64,1) both' }} />
         )}
         {slide.eyebrow && (
-          <div style={{ fontSize: 11, fontWeight: 800, color: useDarkGradient ? '#a78bfa' : '#7c3aed', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 14 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: useDarkGradient ? '#a78bfa' : '#7c3aed', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 14, animation: 'textIn 0.45s ease both' }}>
             {slide.eyebrow}
           </div>
         )}
@@ -316,29 +511,64 @@ function StatementSlide({ slide }) {
           fontSize: slide.gradientBg ? 48 : 38, fontWeight: slide.gradientBg ? 900 : 800,
           color: titleColor, lineHeight: 1.1, marginBottom: 24,
           letterSpacing: slide.gradientBg ? '-0.02em' : 0,
+          animation: 'textIn 0.5s 0.07s ease both',
         }}>
           {slide.title}
         </h2>
-        <p style={{ fontSize: 19, color: bodyColor, lineHeight: 1.7, maxWidth: 560, marginBottom: 40 }}>
+        <p style={{ fontSize: 19, color: bodyColor, lineHeight: 1.7, maxWidth: 560, marginBottom: 40, animation: 'textIn 0.5s 0.15s ease both' }}>
           {slide.body}
         </p>
-        {(slide.chips || []).length > 0 && (
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', marginBottom: slide.bearUrl ? 24 : 0 }}>
-            {slide.chips.map((chip, i) => (
-              <div key={i} style={{
-                background: useDarkGradient ? 'rgba(255,255,255,0.1)' : 'rgba(124,58,237,0.12)',
-                border: `1px solid ${useDarkGradient ? 'rgba(255,255,255,0.2)' : 'rgba(124,58,237,0.3)'}`,
-                borderRadius: 99, padding: useDarkGradient ? '9px 20px' : '8px 18px',
-                fontSize: 13, fontWeight: useDarkGradient ? 700 : 600,
-                color: useDarkGradient ? '#fff' : '#a78bfa',
-              }}>
-                ✦ {chip}
+        {(slide.chips || []).some(c => !!CHIP_DETAILS[c]) && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, marginBottom: slide.bearUrl ? 24 : 0, width: '100%' }}>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
+              {slide.chips.map((chip, i) => {
+                const isInteractive = !!CHIP_DETAILS[chip]
+                const isActive = activeChip === chip
+                if (isInteractive) {
+                  return (
+                    <button key={i} onClick={() => setActiveChip(prev => prev === chip ? null : chip)} style={{
+                      background: isActive ? '#7c3aed' : (useDarkGradient ? 'rgba(255,255,255,0.1)' : 'rgba(124,58,237,0.12)'),
+                      border: `1.5px solid ${isActive ? '#7c3aed' : (useDarkGradient ? 'rgba(255,255,255,0.25)' : 'rgba(124,58,237,0.3)')}`,
+                      borderRadius: 99, padding: '9px 20px',
+                      fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                      color: isActive ? '#fff' : (useDarkGradient ? '#fff' : '#7c3aed'),
+                      animation: isActive ? `chipIn 0.4s cubic-bezier(.34,1.56,.64,1) ${i * 0.12 + 0.25}s both` : `chipIn 0.4s cubic-bezier(.34,1.56,.64,1) ${i * 0.12 + 0.25}s both, chipPulse 2.5s ease-in-out ${i * 0.4 + 1.2}s infinite`,
+                      transition: 'background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s, box-shadow 0.15s',
+                      transform: isActive ? 'scale(1.05)' : 'scale(1)',
+                      boxShadow: isActive ? '0 4px 16px rgba(124,58,237,0.35)' : 'none',
+                    }}>✦ {chip}</button>
+                  )
+                }
+                return (
+                  <div key={i} style={{
+                    background: useDarkGradient ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                    borderRadius: 99, padding: '6px 16px',
+                    fontSize: 12, fontWeight: 500,
+                    color: useDarkGradient ? 'rgba(255,255,255,0.5)' : '#94a3b8',
+                    animation: `textIn 0.4s ease ${i * 0.08 + 0.2}s both`,
+                    letterSpacing: '0.01em',
+                  }}>{chip}</div>
+                )
+              })}
+            </div>
+            {activeChip && (
+              <div style={{ width: '100%', maxWidth: 480, animation: 'textIn 0.3s ease both' }}>
+                <div style={{
+                  background: useDarkGradient ? 'rgba(255,255,255,0.08)' : 'rgba(124,58,237,0.08)',
+                  border: `1px solid ${useDarkGradient ? 'rgba(255,255,255,0.15)' : 'rgba(124,58,237,0.2)'}`,
+                  borderRadius: 12, padding: '12px 16px',
+                  fontSize: 13, lineHeight: 1.6,
+                  color: useDarkGradient ? 'rgba(255,255,255,0.8)' : '#475569',
+                  textAlign: 'center',
+                }}>
+                  {CHIP_DETAILS[activeChip]}
+                </div>
               </div>
-            ))}
+            )}
           </div>
         )}
         {slide.bearUrl && (
-          <img src={slide.bearUrl} alt="" style={{ width: 160, height: 160, objectFit: 'contain', marginTop: 8 }} />
+          <img src={slide.bearUrl} alt="" style={{ width: 160, height: 160, objectFit: 'contain', marginTop: 8, animation: 'iconIn 0.5s 0.3s ease both' }} />
         )}
       </div>
     </div>
@@ -436,218 +666,195 @@ function StepsSlide({ slide }) {
 }
 
 function HotspotSlide({ slide }) {
+  const { isDark } = useTheme()
   const views = slide.views || []
   const hasViews = views.length > 1
   const [activeView, setActiveView] = useState(0)
   const [activeIdx, setActiveIdx] = useState(null)
   const [viewed, setViewed] = useState(new Set())
-  const [scale, setScale] = useState(1)
-  const [offset, setOffset] = useState({ x: 0, y: 0 })
-  const [dragging, setDragging] = useState(false)
-  const dragStart = useRef(null)
-  const wrapRef = useRef(null)
+  const [popupAnchor, setPopupAnchor] = useState(null)
+  const pinRefs = useRef([])
+  const [showDayModal, setShowDayModal] = useState(false)
+  const [dayModalShown, setDayModalShown] = useState(false)
 
   const currentView = hasViews ? views[activeView] : null
   const hotspots = (currentView ? currentView.hotspots : slide.hotspots) || []
   const imageUrl = currentView ? currentView.imageUrl : slide.imageUrl
   const viewDescription = currentView ? currentView.description : (slide.body || 'Click each pin to explore.')
   const activeHotspot = activeIdx !== null ? hotspots[activeIdx] : null
+  const allExplored = hotspots.length > 0 && viewed.size >= hotspots.length
 
-  function switchView(i) {
-    setActiveView(i)
-    setActiveIdx(null)
-    setViewed(new Set())
-    setScale(1)
-    setOffset({ x: 0, y: 0 })
-  }
-
-  useEffect(() => {
-    const el = wrapRef.current
-    if (!el) return
-    const handler = e => {
-      e.preventDefault()
-      setScale(s => {
-        const next = Math.min(4, Math.max(1, s - e.deltaY * 0.001))
-        if (next === 1) setOffset({ x: 0, y: 0 })
-        return next
-      })
-    }
-    el.addEventListener('wheel', handler, { passive: false })
-    return () => el.removeEventListener('wheel', handler)
-  }, [])
-
-  function onMouseDown(e) {
-    if (scale <= 1) return
-    setDragging(true)
-    dragStart.current = { x: e.clientX - offset.x, y: e.clientY - offset.y }
-  }
-  function onMouseMove(e) {
-    if (!dragging || !dragStart.current) return
-    setOffset({ x: e.clientX - dragStart.current.x, y: e.clientY - dragStart.current.y })
-  }
-  function onMouseUp() { setDragging(false) }
-
+  function switchView(i) { setActiveView(i); setActiveIdx(null); setPopupAnchor(null); setViewed(new Set()); pinRefs.current = [] }
   function openHotspot(i) {
     const key = hotspots[i]._key || String(i)
     setActiveIdx(i)
     setViewed(prev => new Set([...prev, key]))
+    const el = pinRefs.current[i]
+    if (el) setPopupAnchor(el.getBoundingClientRect())
   }
-  function closeHotspot() { setActiveIdx(null) }
+  function closeHotspot() { setActiveIdx(null); setPopupAnchor(null) }
   function prevHotspot() { openHotspot((activeIdx - 1 + hotspots.length) % hotspots.length) }
-  function nextHotspot() { openHotspot((activeIdx + 1) % hotspots.length) }
+  function nextHotspot() {
+    const next = (activeIdx + 1) % hotspots.length
+    if (next === 0 && allExplored) { closeHotspot(); return }
+    openHotspot(next)
+  }
 
-  function getPopupStyle(h) {
-    if (!h) return {}
-    const isLeft = h.x < 50
-    const style = { position: 'absolute', width: '38%', minWidth: 220, maxWidth: 340 }
-    if (isLeft) { style.left = `${Math.max(h.x + 3, 19)}%` }
-    else { style.right = `${Math.max(100 - h.x + 3, 5)}%` }
-    style.top = `${Math.max(2, Math.min(68, h.y - 12))}%`
+  function getFixedPopupStyle() {
+    if (!popupAnchor) return {}
+    const W = 288, GAP = 12
+    const style = { position: 'fixed', width: W, zIndex: 1000 }
+    if (popupAnchor.right + GAP + W < window.innerWidth) {
+      style.left = popupAnchor.right + GAP
+    } else {
+      style.right = window.innerWidth - popupAnchor.left + GAP
+    }
+    const topSpace = window.innerHeight - popupAnchor.top - 8
+    const botSpace = popupAnchor.bottom - 8
+    if (topSpace >= botSpace) {
+      style.top = popupAnchor.top
+      style.maxHeight = topSpace
+    } else {
+      style.bottom = window.innerHeight - popupAnchor.bottom
+      style.maxHeight = botSpace
+    }
     return style
   }
 
-  return (
-    <div
-      ref={wrapRef}
-      style={{
-        flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative',
-        cursor: scale > 1 ? (dragging ? 'grabbing' : 'grab') : 'default',
-      }}
-      onMouseDown={onMouseDown}
-      onMouseMove={onMouseMove}
-      onMouseUp={onMouseUp}
-      onMouseLeave={onMouseUp}
-    >
-      <div style={{
-        flexShrink: 0, padding: '10px 24px 10px', textAlign: 'center',
-        background: 'var(--c-bg)', borderBottom: '1px solid var(--c-border)',
-      }}>
-        <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--c-text)', marginBottom: hasViews ? 8 : 3 }}>{slide.title}</h2>
+  useEffect(() => {
+    if (allExplored && activeIdx === null && hasViews && activeView === 0 && !dayModalShown) {
+      setShowDayModal(true); setDayModalShown(true)
+    }
+  }, [allExplored, activeIdx, activeView, hasViews, dayModalShown])
 
+  return (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
+
+      {/* Header */}
+      <div style={{
+        flexShrink: 0, padding: '12px 24px 14px', textAlign: 'center',
+        background: isDark ? 'rgba(15,23,42,0.85)' : 'rgba(237,233,254,0.85)',
+        backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+        borderBottom: '1px solid var(--c-border)',
+      }}>
+        <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--c-text)', marginBottom: hasViews ? 6 : 2 }}>{slide.title}</h2>
         {hasViews && (
-          <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginBottom: 8 }}>
+          <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginBottom: 4 }}>
             {views.map((v, i) => (
-              <button
-                key={v._key || i}
-                onClick={() => switchView(i)}
-                style={{
-                  padding: '4px 16px', borderRadius: 99, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                  background: activeView === i ? '#7c3aed' : 'transparent',
-                  color: activeView === i ? '#fff' : '#64748b',
-                  border: `1.5px solid ${activeView === i ? '#7c3aed' : 'var(--c-border)'}`,
-                  transition: 'all 0.15s',
-                }}
-              >
-                {v.label}
-              </button>
+              <button key={v._key || i} onClick={() => switchView(i)} style={{
+                padding: '4px 16px', borderRadius: 99, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                background: activeView === i ? '#7c3aed' : 'transparent',
+                color: activeView === i ? '#fff' : '#64748b',
+                border: `1.5px solid ${activeView === i ? '#7c3aed' : 'var(--c-border)'}`,
+                transition: 'all 0.15s',
+              }}>{v.label}</button>
             ))}
           </div>
         )}
-
-        <p style={{ fontSize: 12, color: '#64748b' }}>
-          {viewDescription}
-          {hotspots.length > 0 && (
-            <span style={{ marginLeft: 8, fontWeight: 600, color: viewed.size === hotspots.length ? '#059669' : '#94a3b8' }}>
-              {viewed.size === hotspots.length ? 'All explored ✓' : `${viewed.size}/${hotspots.length} explored`}
-            </span>
-          )}
+        <p style={{ fontSize: 12, color: '#64748b', marginBottom: 0 }}>
+          {!allExplored && hotspots.length > 0
+            ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.2)', borderRadius: 6, padding: '2px 8px', fontSize: 11, fontWeight: 700, color: '#7c3aed' }}>
+                  Click the numbered pins
+                </span>
+                <span style={{ color: '#94a3b8', fontWeight: 600 }}>{viewed.size}/{hotspots.length} explored</span>
+              </span>
+            : viewDescription
+          }
         </p>
       </div>
 
-      <div
-        style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingBottom: 16, overflow: 'hidden' }}
-        onClick={e => { if (e.target === e.currentTarget) closeHotspot() }}
-      >
-        <div style={{
-          position: 'relative', display: 'inline-block',
-          transform: `scale(${scale}) translate(${offset.x / scale}px, ${offset.y / scale}px)`,
-          transformOrigin: 'center center',
-          transition: dragging ? 'none' : 'transform 0.12s ease',
-        }}>
+      {/* Image + pins */}
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px 16px 4px', overflow: 'hidden', minWidth: 0 }}>
+        <div style={{ position: 'relative', display: 'inline-block', maxWidth: '100%', flexShrink: 1 }}>
           {imageUrl && (
-            <img
-              src={imageUrl}
-              alt={slide.title}
-              draggable={false}
-              onClick={e => { if (!activeHotspot) return; e.stopPropagation(); closeHotspot() }}
-              style={{
-                display: 'block',
-                maxWidth: 'calc(100vw - 128px)',
-                maxHeight: 'calc(100vh - 240px)',
-                width: 'auto', height: 'auto',
-                borderRadius: 8, border: '1px solid #334155',
-                boxShadow: '0 6px 40px rgba(0,0,0,0.3)', userSelect: 'none',
-              }}
-            />
-          )}
-
-          {hotspots.filter(h => h.areaW).map(h => (
-            <div key={`area-${h._key}`} style={{
-              position: 'absolute', left: `${h.areaX}%`, top: `${h.areaY}%`,
-              width: `${h.areaW}%`, height: `${h.areaH}%`,
-              border: `3px solid ${activeIdx !== null && hotspots[activeIdx]?._key === h._key ? '#facc15' : 'rgba(250,204,21,0.88)'}`,
-              borderRadius: 6, pointerEvents: 'none', zIndex: 5, boxSizing: 'border-box',
-              background: activeIdx !== null && hotspots[activeIdx]?._key === h._key ? 'rgba(250,204,21,0.13)' : 'rgba(250,204,21,0.07)',
-              transition: 'all 0.2s',
+            <img src={imageUrl} alt={slide.title} draggable={false} style={{
+              display: 'block', maxWidth: '100%', maxHeight: 'calc(100vh - 240px)',
+              width: 'auto', height: 'auto', borderRadius: 8, border: '1px solid #334155',
+              boxShadow: '0 6px 40px rgba(0,0,0,0.3)', userSelect: 'none',
             }} />
-          ))}
-
+          )}
           {hotspots.map((h, i) => {
             const key = h._key || String(i)
             const isActive = activeIdx === i
             const isViewed = viewed.has(key)
             return (
-              <div key={key} style={{ position: 'absolute', left: `${h.x}%`, top: `${h.y}%`, transform: 'translate(-50%, -50%)', width: 26, height: 26, zIndex: isActive ? 60 : 10 }}>
+              <div key={key} style={{ position: 'absolute', left: `${h.x}%`, top: `${h.y}%`, transform: 'translate(-50%,-50%)', width: 34, height: 34, zIndex: isActive ? 60 : 30 }}>
                 <button
+                  ref={el => { pinRefs.current[i] = el }}
                   onClick={e => { e.stopPropagation(); isActive ? closeHotspot() : openHotspot(i) }}
                   title={h.label}
-                  className={!isActive && !isViewed ? 'pin-pulse' : ''}
                   style={{
-                    width: 26, height: 26, borderRadius: '50%',
+                    width: 34, height: 34, borderRadius: '50%',
                     background: isActive ? 'linear-gradient(135deg,#7c3aed,#4f46e5)' : isViewed ? 'linear-gradient(135deg,#059669,#047857)' : 'linear-gradient(135deg,#fde68a,#facc15)',
-                    border: `2px solid ${isActive ? '#a78bfa' : isViewed ? '#6ee7b7' : '#a16207'}`,
-                    boxShadow: isActive ? '0 0 0 3px rgba(124,58,237,0.3)' : '0 2px 6px rgba(0,0,0,0.35)',
+                    border: `2.5px solid ${isActive ? '#a78bfa' : isViewed ? '#6ee7b7' : '#a16207'}`,
+                    boxShadow: isActive ? '0 0 0 4px rgba(124,58,237,0.3)' : isViewed ? '0 2px 8px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.35)',
                     color: isActive || isViewed ? '#fff' : '#1e293b',
-                    fontWeight: 800, fontSize: 10, cursor: 'pointer',
+                    fontWeight: 800, fontSize: 12, cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    transition: 'background 0.2s, border-color 0.2s, box-shadow 0.2s', flexShrink: 0,
+                    transition: 'background 0.2s, border-color 0.2s, box-shadow 0.2s',
+                    animation: !isActive && !isViewed ? 'pinPulse 2.5s ease-in-out infinite' : 'none',
                   }}
-                >
-                  {isViewed && !isActive ? '✓' : i + 1}
-                </button>
-
-                {isActive && (
-                  <div style={{
-                    ...getPopupStyle(h),
-                    background: '#fff', borderRadius: 12,
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.22)', border: '1px solid #e2e8f0',
-                    zIndex: 50, overflow: 'hidden', animation: 'panel-slide-in 0.15s ease forwards',
-                  }}>
-                    <div style={{ padding: '12px 14px 10px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                      <div style={{ fontWeight: 700, fontSize: 14, color: '#0f172a', lineHeight: 1.3 }}>{h.label}</div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-                        <button onClick={e => { e.stopPropagation(); prevHotspot() }} style={{ background: 'none', border: '1px solid #e2e8f0', borderRadius: 6, width: 24, height: 24, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', fontSize: 13, fontWeight: 700 }}>‹</button>
-                        <button onClick={e => { e.stopPropagation(); nextHotspot() }} style={{ background: 'none', border: '1px solid #e2e8f0', borderRadius: 6, width: 24, height: 24, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', fontSize: 13, fontWeight: 700 }}>›</button>
-                        <button onClick={e => { e.stopPropagation(); closeHotspot() }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', display: 'flex', alignItems: 'center', marginLeft: 2 }}><X size={13} /></button>
-                      </div>
-                    </div>
-                    <div style={{ padding: '11px 14px 13px' }}>
-                      <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.6, margin: 0 }}>{h.description}</p>
-                      <div style={{ marginTop: 9, fontSize: 11, color: '#cbd5e1', fontWeight: 600 }}>{i + 1} / {hotspots.length}</div>
-                    </div>
-                  </div>
-                )}
+                >{isViewed && !isActive ? '✓' : i + 1}</button>
               </div>
             )
           })}
         </div>
       </div>
 
-      {scale === 1 && (
-        <div style={{ position: 'absolute', bottom: 96, left: 0, right: 0, textAlign: 'center', pointerEvents: 'none', zIndex: 5 }}>
-          <span style={{ fontSize: 11, color: '#64748b', background: 'rgba(15,23,42,0.6)', padding: '3px 10px', borderRadius: 99, backdropFilter: 'blur(4px)' }}>
-            Scroll to zoom in
-          </span>
+      {/* Backdrop */}
+      {activeIdx !== null && (
+        <div onClick={closeHotspot} style={{ position: 'absolute', inset: 0, zIndex: 20, cursor: 'default' }} />
+      )}
+
+      {/* Fixed popup next to pin */}
+      {activeIdx !== null && activeHotspot && popupAnchor && (
+        <div onClick={e => e.stopPropagation()} style={{
+          ...getFixedPopupStyle(),
+          background: '#fff', borderRadius: 12,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.22)', border: '1px solid #e2e8f0',
+          overflow: 'hidden', animation: 'glassIn 0.18s ease both',
+        }}>
+          <div style={{ padding: '12px 14px 10px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+            <div style={{ fontWeight: 700, fontSize: 13, color: '#0f172a', lineHeight: 1.3 }}>{activeHotspot.label}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+              <button onClick={e => { e.stopPropagation(); prevHotspot() }} style={{ background: 'none', border: '1px solid #e2e8f0', borderRadius: 6, width: 22, height: 22, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', fontSize: 12, fontWeight: 700 }}>‹</button>
+              <button onClick={e => { e.stopPropagation(); nextHotspot() }} style={{ background: 'none', border: '1px solid #e2e8f0', borderRadius: 6, width: 22, height: 22, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', fontSize: 12, fontWeight: 700 }}>›</button>
+              <button onClick={e => { e.stopPropagation(); closeHotspot() }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', display: 'flex', alignItems: 'center', marginLeft: 2 }}><X size={13} /></button>
+            </div>
+          </div>
+          <div style={{ padding: '10px 14px 12px', overflowY: 'auto' }}>
+            <p style={{ fontSize: 12.5, color: '#475569', lineHeight: 1.6, margin: 0, whiteSpace: 'pre-wrap' }}>{activeHotspot.description}</p>
+            <div style={{ marginTop: 8, fontSize: 10, color: '#cbd5e1', fontWeight: 600 }}>{activeIdx + 1} / {hotspots.length}</div>
+          </div>
+        </div>
+      )}
+
+      {/* Day View modal */}
+      {showDayModal && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 500,
+          background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <div style={{
+            background: '#fff', borderRadius: 20, padding: '36px 32px 28px',
+            maxWidth: 400, width: '90%', textAlign: 'center',
+            boxShadow: '0 24px 80px rgba(0,0,0,0.3)',
+            animation: 'glassIn 0.25s ease both',
+          }}>
+            <div style={{ fontSize: 44, marginBottom: 14 }}>🗓️</div>
+            <h3 style={{ fontSize: 21, fontWeight: 800, color: '#0f172a', lineHeight: 1.2, marginBottom: 10 }}>Week View down!</h3>
+            <p style={{ fontSize: 14, color: '#64748b', lineHeight: 1.65, marginBottom: 26 }}>
+              Now try <strong style={{ color: '#0f172a' }}>Day View</strong> — it gives you a live staffing snapshot for today: who's on, where they're assigned, and where the gaps are.
+            </p>
+            <button onClick={() => { setShowDayModal(false); switchView(1) }} style={{
+              width: '100%', background: 'linear-gradient(135deg,#7c3aed,#4f46e5)',
+              border: 'none', borderRadius: 12, padding: '13px 0',
+              color: '#fff', fontWeight: 700, fontSize: 15, cursor: 'pointer',
+              boxShadow: '0 4px 16px rgba(124,58,237,0.4)',
+            }}>Try Day View →</button>
+          </div>
         </div>
       )}
     </div>
@@ -657,65 +864,86 @@ function HotspotSlide({ slide }) {
 function SupportSlide() {
   const { isDark } = useTheme()
 
-  const bg = isDark ? '#0f172a' : '#f8fafc'
-  const headlineColor = isDark ? '#fff' : '#0f172a'
-  const subColor = '#64748b'
-  const ringColor = isDark ? 'rgba(124,58,237,0.1)' : 'rgba(124,58,237,0.08)'
-  const channelNameColor = isDark ? '#fff' : '#0f172a'
-  const channelValColor = '#64748b'
-  const dividerColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)'
-  const promiseBg = isDark ? 'rgba(124,58,237,0.08)' : 'rgba(124,58,237,0.05)'
-  const promiseBorder = isDark ? 'rgba(124,58,237,0.18)' : 'rgba(124,58,237,0.15)'
-  const promiseColor = isDark ? 'rgba(255,255,255,0.5)' : '#475569'
+  const linkStyle = { color: '#a78bfa', textDecoration: 'none', fontWeight: 600 }
 
-  const channel = (emoji, bg2, glow, border, name, val) => (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-      <div style={{
-        width: 64, height: 64, borderRadius: 18,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 28, background: bg2, boxShadow: glow, border,
-      }}>{emoji}</div>
-      <div style={{ fontSize: 13, fontWeight: 700, color: channelNameColor }}>{name}</div>
-      <div style={{ fontSize: 12, color: channelValColor }}>{val}</div>
-    </div>
-  )
+  const cards = [
+    {
+      emoji: '💬',
+      iconBg: 'rgba(124,58,237,0.15)',
+      label: 'Live Chat',
+      body: 'Chat with a real person inside Veras — or ask our AI Agent anytime.',
+      link: (
+        <button
+          onClick={() => { if (typeof window.Intercom === 'function') window.Intercom('show') }}
+          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', ...linkStyle }}
+        >
+          Open Live Chat
+        </button>
+      ),
+    },
+    {
+      emoji: '✉️',
+      iconBg: 'rgba(16,185,129,0.12)',
+      label: 'Email Support',
+      body: 'Send us a message and we\'ll get back to you fast — usually same day.',
+      link: <a href="mailto:support@veras.com" style={linkStyle}>support@veras.com</a>,
+    },
+    {
+      emoji: '📚',
+      iconBg: 'rgba(59,130,246,0.12)',
+      label: 'Help Center',
+      body: 'Step-by-step guides, how-tos, and answers for admins and staff alike.',
+      link: <a href="https://help.veras.com/en/" target="_blank" rel="noreferrer" style={linkStyle}>help.veras.com</a>,
+    },
+  ]
 
   return (
     <div style={{
       flex: 1, display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center',
-      padding: '48px 80px 64px', background: bg,
-      textAlign: 'center', position: 'relative', overflow: 'hidden',
+      alignItems: 'center', justifyContent: 'flex-start',
+      padding: '36px 80px 16px', textAlign: 'center',
+      position: 'relative', overflow: 'hidden',
+      background: isDark ? 'linear-gradient(160deg, #1e1035 0%, #0f172a 60%, #0c1226 100%)' : 'linear-gradient(145deg, #ede9fe 0%, #f8fafc 40%, #e0f2fe 100%)',
     }}>
-      <div style={{ position: 'absolute', width: 640, height: 640, borderRadius: '50%', border: `1px solid ${ringColor}`, top: '50%', left: '50%', transform: 'translate(-50%, -50%)', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', border: `1px solid ${ringColor}`, top: '50%', left: '50%', transform: 'translate(-50%, -50%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', width: 500, height: 400, background: isDark ? 'rgba(124,58,237,0.18)' : 'rgba(124,58,237,0.12)', top: -120, left: -80, filter: 'blur(90px)', animation: 'liquidShift 8s ease-in-out infinite', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', width: 400, height: 350, background: isDark ? 'rgba(59,130,246,0.12)' : 'rgba(59,130,246,0.10)', bottom: -80, right: -80, filter: 'blur(90px)', animation: 'liquidShift 8s ease-in-out infinite', animationDelay: '-4s', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', width: 300, height: 280, background: isDark ? 'rgba(16,185,129,0.10)' : 'rgba(16,185,129,0.08)', bottom: 60, left: '20%', filter: 'blur(90px)', animation: 'liquidShift 8s ease-in-out infinite', animationDelay: '-2s', pointerEvents: 'none' }} />
 
-      <h2 style={{ fontSize: 50, fontWeight: 900, lineHeight: 1.07, letterSpacing: '-0.03em', marginBottom: 12, position: 'relative', zIndex: 1, color: headlineColor }}>
-        Real support,<br />
-        <span style={{ background: 'linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          real people.
-        </span>
-      </h2>
-
-      <p style={{ fontSize: 17, color: subColor, lineHeight: 1.6, maxWidth: 480, marginBottom: 52, position: 'relative', zIndex: 1 }}>
-        Veras includes dedicated support from our team — available in-app, by email, and in a full help center built for you.
-      </p>
-
-      <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
-        {channel('💬', 'linear-gradient(135deg,rgba(124,58,237,0.25),rgba(124,58,237,0.1))', '0 0 32px rgba(124,58,237,0.25)', '1px solid rgba(124,58,237,0.3)', 'Live Chat', 'Inside Veras')}
-        <div style={{ width: 1, height: 64, background: dividerColor, alignSelf: 'center' }} />
-        {channel('✉️', 'linear-gradient(135deg,rgba(16,185,129,0.2),rgba(16,185,129,0.05))', '0 0 32px rgba(16,185,129,0.15)', '1px solid rgba(16,185,129,0.25)', 'Email', 'support@veras.com')}
-        <div style={{ width: 1, height: 64, background: dividerColor, alignSelf: 'center' }} />
-        {channel('📚', 'linear-gradient(135deg,rgba(59,130,246,0.2),rgba(59,130,246,0.05))', '0 0 32px rgba(59,130,246,0.12)', '1px solid rgba(59,130,246,0.25)', 'Help Center', 'help.veras.com')}
+      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7c3aed', marginBottom: 14, position: 'relative', zIndex: 1 }}>
+        White-Glove Support
       </div>
 
-      <div style={{
-        marginTop: 44, background: promiseBg, border: `1px solid ${promiseBorder}`,
-        borderRadius: 12, padding: '14px 28px',
-        fontSize: 14, color: promiseColor, lineHeight: 1.5, maxWidth: 480,
-        position: 'relative', zIndex: 1,
-      }}>
-        <strong style={{ color: '#a78bfa', fontWeight: 600 }}>White-glove from day one.</strong> Our onboarding team sets everything up with you — and stays available long after launch.
+      <h2 style={{ fontSize: 46, fontWeight: 900, lineHeight: 1.08, letterSpacing: '-0.025em', marginBottom: 14, position: 'relative', zIndex: 1, color: isDark ? '#fff' : '#0f172a' }}>
+        We're with you<br />every step of the way.
+      </h2>
+
+      <p style={{ fontSize: 17, color: isDark ? 'rgba(255,255,255,0.48)' : '#64748b', lineHeight: 1.6, maxWidth: 460, marginBottom: 44, position: 'relative', zIndex: 1 }}>
+        Questions, issues, or just getting started — our team is here however you need us.
+      </p>
+
+      <div style={{ display: 'flex', gap: 16, width: '100%', maxWidth: 860, position: 'relative', zIndex: 1 }}>
+        {cards.map((c, i) => (
+          <div key={i} style={{
+            flex: 1,
+            background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.65)',
+            border: '1px solid rgba(255,255,255,0.9)',
+            borderRadius: 20, padding: '28px 20px 22px',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
+            backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)',
+            position: 'relative', overflow: 'hidden',
+            animation: `glassIn 0.5s cubic-bezier(.34,1.3,.64,1) ${i * 0.1 + 0.1}s both`,
+          }}>
+            <div style={{ width: 48, height: 48, borderRadius: 12, background: c.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
+              {c.emoji}
+            </div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: isDark ? '#fff' : '#0f172a' }}>{c.label}</div>
+            <div style={{ fontSize: 12.5, color: isDark ? '#94a3b8' : '#64748b', lineHeight: 1.5 }}>{c.body}</div>
+            <div style={{ fontSize: 12, background: 'rgba(124,58,237,0.12)', borderRadius: 6, padding: '5px 12px', marginTop: 4 }}>
+              {c.link}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )
@@ -812,7 +1040,6 @@ export default function IntroPage() {
   const [error, setError] = useState(null)
   const [slideIndex, setSlideIndex] = useState(0)
   const [checklistChecked, setChecklistChecked] = useState([])
-  const [arrowHidden, setArrowHidden] = useState(false)
   const scrollRef = useRef(null)
   const c = useColors()
   const { isDark, toggle } = useTheme()
@@ -825,8 +1052,6 @@ export default function IntroPage() {
   }, [])
 
   useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = 0
-    setArrowHidden(false)
     setChecklistChecked([])
   }, [slideIndex])
 
@@ -834,21 +1059,26 @@ export default function IntroPage() {
     document.title = 'Welcome to Veras'
   }, [])
 
-  function handleScrollArea(e) {
+  function handleScroll(e) {
     const el = e.currentTarget
-    const isScrollable = el.scrollHeight > el.clientHeight + 10
-    if (isScrollable && el.scrollTop + el.clientHeight >= el.scrollHeight - 24) {
-      setArrowHidden(true)
-    }
+    if (!el.clientHeight) return
+    const newIndex = Math.round(el.scrollTop / el.clientHeight)
+    if (newIndex !== slideIndex) setSlideIndex(newIndex)
+  }
+
+  function scrollToSlide(i) {
+    const el = scrollRef.current
+    if (el) el.scrollTo({ top: i * el.clientHeight, behavior: 'smooth' })
   }
 
   const goNext = useCallback(() => {
-    if (!course) return
-    if (slideIndex < course.slides.length - 1) setSlideIndex(i => i + 1)
+    if (!course || slideIndex >= course.slides.length - 1) return
+    scrollToSlide(slideIndex + 1)
   }, [slideIndex, course])
 
   const goPrev = useCallback(() => {
-    if (slideIndex > 0) setSlideIndex(i => i - 1)
+    if (slideIndex <= 0) return
+    scrollToSlide(slideIndex - 1)
   }, [slideIndex])
 
   useEffect(() => {
@@ -860,23 +1090,6 @@ export default function IntroPage() {
     return () => window.removeEventListener('keydown', handleKey)
   }, [goNext, goPrev])
 
-  useEffect(() => {
-    let accumulated = 0
-    let cooldown = false
-    function handleWheel(e) {
-      if (cooldown) return
-      accumulated += e.deltaY
-      if (accumulated > 2000) {
-        goNext(); accumulated = 0; cooldown = true
-        setTimeout(() => { cooldown = false }, 2000)
-      } else if (accumulated < -2000) {
-        goPrev(); accumulated = 0; cooldown = true
-        setTimeout(() => { cooldown = false }, 2000)
-      }
-    }
-    window.addEventListener('wheel', handleWheel, { passive: true })
-    return () => window.removeEventListener('wheel', handleWheel)
-  }, [goNext, goPrev])
 
   if (loading) {
     return (
@@ -902,14 +1115,25 @@ export default function IntroPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: c.bg, transition: 'background-color 0.25s' }}>
       <style>{`
-        @keyframes bounce-arrow {
-          0%, 100% { transform: translateY(0); opacity: 0.7; }
-          50% { transform: translateY(7px); opacity: 1; }
-        }
-        @keyframes fade-pulse {
-          0%, 100% { opacity: 0.5; }
-          50% { opacity: 1; }
-        }
+        @keyframes bounce-arrow { 0%,100%{transform:translateY(0);opacity:.7} 50%{transform:translateY(7px);opacity:1} }
+        @keyframes fade-pulse { 0%,100%{opacity:.5} 50%{opacity:1} }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+        @keyframes orb1 { 0%,100%{transform:translate(0,0)} 33%{transform:translate(40px,-30px)} 66%{transform:translate(-20px,20px)} }
+        @keyframes orb2 { 0%,100%{transform:translate(0,0)} 33%{transform:translate(-50px,30px)} 66%{transform:translate(30px,-40px)} }
+        @keyframes orb3 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(25px,35px)} }
+        @keyframes iconIn { from{opacity:0;transform:scale(0.7)} to{opacity:1;transform:scale(1)} }
+        @keyframes textIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes shimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        @keyframes chipIn { from{opacity:0;transform:scale(0.85) translateY(8px)} to{opacity:1;transform:none} }
+        @keyframes particleDrift { 0%{transform:translateY(0) translateX(0);opacity:0} 10%{opacity:.8} 90%{opacity:.4} 100%{transform:translateY(-100px) translateX(var(--dx));opacity:0} }
+        @keyframes liquidShift { 0%,100%{border-radius:60% 40% 30% 70% / 60% 30% 70% 40%} 25%{border-radius:30% 60% 70% 40% / 50% 60% 30% 60%} 50%{border-radius:50% 50% 40% 60% / 40% 70% 30% 60%} 75%{border-radius:40% 60% 50% 50% / 60% 40% 60% 40%} }
+        @keyframes glassIn { from{opacity:0;transform:translateY(20px) scale(0.97)} to{opacity:1;transform:none} }
+        @keyframes lightboxBdIn { from{opacity:0} to{opacity:1} }
+        @keyframes lightboxImgIn { from{opacity:0;transform:scale(0.82)} to{opacity:1;transform:scale(1)} }
+        @keyframes flipHint { 0%,70%,100%{opacity:0.5;transform:scale(1)} 85%{opacity:1;transform:scale(1.15)} }
+        @keyframes pinPulse { 0%,100%{box-shadow:0 2px 8px rgba(0,0,0,0.35)} 50%{box-shadow:0 0 0 8px rgba(250,204,21,0.2),0 2px 8px rgba(0,0,0,0.35)} }
+        @keyframes chipPulse { 0%,60%,100%{transform:scale(1);box-shadow:none} 80%{transform:scale(1.06);box-shadow:0 0 0 4px rgba(124,58,237,0.18)} }
       `}</style>
 
       {/* Top nav */}
@@ -945,10 +1169,23 @@ export default function IntroPage() {
 
       {/* Main content */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        <div ref={scrollRef} onScroll={handleScrollArea} style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
-          <div key={slideIndex} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 56px)', paddingBottom: 90, animation: 'slide-fade-in 0.22s ease forwards' }}>
-            {renderSlide(slide, checklistChecked, i => setChecklistChecked(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i]))}
-          </div>
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          style={{ flex: 1, overflowY: 'scroll', scrollSnapType: 'y mandatory' }}
+        >
+          {course.slides.map((s, i) => (
+            <div key={s._key || i} style={{
+              height: 'calc(100vh - 56px)',
+              scrollSnapAlign: 'start',
+              display: 'flex', flexDirection: 'column',
+              overflow: 'hidden',
+              paddingBottom: 72,
+              background: isDark ? 'linear-gradient(135deg, #1e1035 0%, #0f172a 100%)' : 'linear-gradient(135deg, #ede9fe 0%, #f8fafc 40%, #e0f2fe 100%)',
+            }}>
+              {renderSlide(s, checklistChecked, j => setChecklistChecked(prev => prev.includes(j) ? prev.filter(x => x !== j) : [...prev, j]))}
+            </div>
+          ))}
         </div>
 
         {/* Slide sidebar */}
@@ -959,7 +1196,7 @@ export default function IntroPage() {
           {course.slides.map((_, i) => (
             <button
               key={i}
-              onClick={() => setSlideIndex(i)}
+              onClick={() => scrollToSlide(i)}
               style={{
                 width: 28, height: 28, borderRadius: '50%',
                 background: i === slideIndex ? '#7c3aed' : i < slideIndex ? '#334155' : '#0f172a',
@@ -975,16 +1212,32 @@ export default function IntroPage() {
         </div>
       </div>
 
-      {/* Bottom: arrow or done state */}
-      {!isLastSlide && !arrowHidden ? (
-        <div style={{
-          position: 'fixed', bottom: 0, left: 0, right: 48,
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
-          padding: '8px 0 16px', gap: 6,
-          background: 'linear-gradient(to bottom, transparent, var(--c-bg) 60%)',
-          pointerEvents: 'none', zIndex: 10,
-        }}>
-          <div style={{ width: 80, height: 3, background: '#e2e8f0', borderRadius: 99, overflow: 'hidden' }}>
+      {/* Bottom nav: Prev / progress / Next */}
+      <div style={{
+        position: 'fixed', bottom: 0, left: 0, right: 48,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        gap: 16, padding: '10px 24px 14px',
+        background: isDark ? 'rgba(15,23,42,0.85)' : 'rgba(248,250,252,0.88)',
+        backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+        borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+        zIndex: 10,
+      }}>
+        <button
+          onClick={goPrev}
+          disabled={slideIndex === 0}
+          style={{
+            background: 'transparent',
+            border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)'}`,
+            borderRadius: 99, padding: '7px 18px',
+            fontSize: 13, fontWeight: 600,
+            color: slideIndex === 0 ? (isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)') : (isDark ? '#e2e8f0' : '#475569'),
+            cursor: slideIndex === 0 ? 'default' : 'pointer',
+            transition: 'all 0.15s',
+          }}
+        >← Back</button>
+
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, flex: 1, maxWidth: 160 }}>
+          <div style={{ width: '100%', height: 3, background: isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0', borderRadius: 99, overflow: 'hidden' }}>
             <div style={{
               height: '100%', borderRadius: 99,
               background: `linear-gradient(90deg, ${GRADIENT[0]}, ${GRADIENT[1]})`,
@@ -992,21 +1245,26 @@ export default function IntroPage() {
               transition: 'width 0.3s ease',
             }} />
           </div>
+          <span style={{ fontSize: 10, color: isDark ? 'rgba(255,255,255,0.35)' : '#94a3b8', fontWeight: 600, letterSpacing: '0.04em' }}>
+            {slideIndex + 1} / {course.slides.length}
+          </span>
+        </div>
+
+        {!isLastSlide ? (
           <button
             onClick={goNext}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, pointerEvents: 'auto' }}
-          >
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', animation: 'fade-pulse 2s ease-in-out infinite' }}>
-              {nudgeText}
-            </span>
-            <ChevronDown
-              size={26}
-              color={GRADIENT[0]}
-              style={{ animation: 'bounce-arrow 1.4s ease-in-out infinite' }}
-            />
-          </button>
-        </div>
-      ) : null}
+            style={{
+              background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
+              border: 'none', borderRadius: 99, padding: '7px 18px',
+              fontSize: 13, fontWeight: 700, color: '#fff',
+              cursor: 'pointer', boxShadow: '0 2px 8px rgba(124,58,237,0.4)',
+              transition: 'opacity 0.15s',
+            }}
+          >Next →</button>
+        ) : (
+          <div style={{ width: 80 }} />
+        )}
+      </div>
     </div>
   )
 }

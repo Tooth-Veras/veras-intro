@@ -8,37 +8,29 @@
   body { font-family: -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px; gap: 20px; }
   h1 { font-size: 18px; font-weight: 700; color: #fff; }
   .subtitle { font-size: 13px; color: #94a3b8; text-align: center; max-width: 700px; line-height: 1.5; }
+  .view-tabs { display: flex; gap: 8px; }
+  .view-tab {
+    padding: 7px 20px; border-radius: 99px; font-size: 13px; font-weight: 600; cursor: pointer;
+    border: 1.5px solid #334155; background: transparent; color: #64748b; transition: all 0.15s;
+  }
+  .view-tab.active { background: #7c3aed; border-color: #7c3aed; color: #fff; }
   .image-wrap { position: relative; display: inline-block; user-select: none; max-width: 100%; }
   .image-wrap img { display: block; max-width: 900px; width: 100%; border-radius: 10px; border: 1px solid #334155; }
   .pin {
-    position: absolute;
-    width: 28px; height: 28px;
-    border-radius: 50%;
+    position: absolute; width: 28px; height: 28px; border-radius: 50%;
     background: linear-gradient(135deg, #fde68a, #facc15);
-    border: 2px solid #a16207;
-    color: #1e293b;
+    border: 2px solid #a16207; color: #1e293b;
     font-size: 11px; font-weight: 800;
     display: flex; align-items: center; justify-content: center;
-    cursor: grab;
-    transform: translate(-50%, -50%);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-    transition: box-shadow 0.1s, transform 0.05s;
-    z-index: 10;
+    cursor: grab; transform: translate(-50%, -50%);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4); z-index: 10;
   }
-  .pin:active { cursor: grabbing; box-shadow: 0 4px 16px rgba(0,0,0,0.6); }
+  .pin:active { cursor: grabbing; }
   .pin .tooltip {
-    position: absolute;
-    bottom: 34px; left: 50%;
-    transform: translateX(-50%);
-    background: #1e293b;
-    border: 1px solid #475569;
-    border-radius: 6px;
-    padding: 4px 8px;
-    font-size: 11px;
-    color: #e2e8f0;
-    white-space: nowrap;
-    pointer-events: none;
-    display: none;
+    position: absolute; bottom: 34px; left: 50%; transform: translateX(-50%);
+    background: #1e293b; border: 1px solid #475569; border-radius: 6px;
+    padding: 4px 8px; font-size: 11px; color: #e2e8f0;
+    white-space: nowrap; pointer-events: none; display: none;
   }
   .pin:hover .tooltip { display: block; }
   .output-panel {
@@ -58,16 +50,22 @@
   }
   .copy-btn:hover { background: #6d28d9; }
   .copy-btn.copied { background: #059669; }
+  .patch-note { margin-top: 10px; font-size: 12px; color: #64748b; }
   pre { font-size: 12px; color: #a5b4fc; margin-top: 12px; background: #0f172a; padding: 12px; border-radius: 6px; overflow-x: auto; white-space: pre-wrap; }
 </style>
 </head>
 <body>
 
 <h1>Hotspot Pin Editor</h1>
-<p class="subtitle">Drag each numbered pin to the correct position on the screenshot. Pins auto-renumber 1–5 in reading order (left→right, top→bottom) as you move them. When done, click <strong>Copy JSON</strong> and paste into Sanity.</p>
+<p class="subtitle">Select a view, then drag pins to position. When done, click <strong>Copy JSON</strong> — then paste the output into the Sanity patch and run it.</p>
+
+<div class="view-tabs">
+  <button class="view-tab" onclick="switchView('week')">Week View</button>
+  <button class="view-tab active" onclick="switchView('day')">Day View</button>
+</div>
 
 <div class="image-wrap" id="imageWrap">
-  <img id="schedImg" src="https://cdn.sanity.io/images/nl3cliwe/production/bd3ca9148e1380243e8f1150e837cd8b28d395f3-1919x931.png" draggable="false" alt="Schedule" />
+  <img id="schedImg" src="" draggable="false" alt="Schedule" />
 </div>
 
 <div class="output-panel">
@@ -77,23 +75,55 @@
     <tbody id="coordsBody"></tbody>
   </table>
   <button class="copy-btn" id="copyBtn" onclick="copyJSON()">Copy JSON for Sanity</button>
+  <p class="patch-note" id="patchNote"></p>
   <pre id="jsonOut"></pre>
 </div>
 
 <script>
-const PINS = [
-  { id: 'h1', label: 'Budget Indicators',  description: 'Green checkmark = on budget. Yellow up arrow = overstaffed. Red down arrow = understaffed. Hourglass = open shifts still need filling. These update live as you make changes — your at-a-glance guide to whether coverage is right.', x: 35, y: 21 },
-  { id: 'h2', label: 'Open Shifts',         description: 'Shifts with no one assigned. Click to fill manually, share them out for staff to claim from their phones, or assign to agency. They also show as hourglass icons in the budget row above.', x: 13, y: 71 },
-  { id: 'h3', label: 'Filters & Views',     description: 'Filter by position, department, area, or shift status to focus the view. Switch between Day, Week, and Month — Week is best for building schedules, Day gives you a live staffing summary with call-off counts.', x: 16, y: 10 },
-  { id: 'h4', label: 'Apply & Publish',     description: 'Step 1: Apply Schedules builds draft shifts from each staff member\'s recurring schedule template — invisible to staff. Step 2: Publish sends the finalized schedule to their phones. Always Apply first, then Publish.', x: 87, y: 4  },
-  { id: 'h5', label: 'Overtime Flag',       description: 'The triangle means this staff member is approaching or over 40 hours. Veras surfaces this before you approve any shift so you can weigh overtime costs before committing.', x: 93, y: 37 },
-]
+const VIEWS = {
+  week: {
+    imageUrl: 'https://cdn.sanity.io/images/nl3cliwe/production/bd3ca9148e1380243e8f1150e837cd8b28d395f3-1919x931.png',
+    patchPath: 'slides[_key=="s4"].views[_key=="week"].hotspots',
+    pins: [
+      { id: 'h3', label: 'Filters & Views',    description: 'Filter by position, department, area, or shift status to focus the view. Switch between Day, Week, and Month — Week is best for building schedules, Day gives you a live staffing summary with call-off counts.', x: 10.2, y: 4.8 },
+      { id: 'h4', label: 'Apply & Publish',    description: 'Step 1: Apply Schedules builds draft shifts from each staff member\'s recurring schedule template — invisible to staff. Step 2: Publish sends the finalized schedule to their phones. Always Apply first, then Publish.', x: 80.8, y: 4.7 },
+      { id: 'h1', label: 'Budget Indicators',  description: 'Green checkmark = on budget. Yellow up arrow = overstaffed. Red down arrow = understaffed. Hourglass = open shifts still need filling. These update live as you make changes — your at-a-glance guide to whether coverage is right.', x: 55, y: 19.6 },
+      { id: 'h5', label: 'Overtime Flag',      description: 'The triangle means this staff member is approaching or over 40 hours. Veras surfaces this before you approve any shift so you can weigh overtime costs before committing.', x: 97.8, y: 35.4 },
+      { id: 'h2', label: 'Open Shifts',        description: 'Shifts with no one assigned. Click to fill manually, share them out for staff to claim from their phones, or assign to agency. They also show as hourglass icons in the budget row above.', x: 9.7, y: 79.5 },
+    ]
+  },
+  day: {
+    imageUrl: '/schedule-day.png',
+    patchPath: 'slides[_key=="s4"].views[_key=="day"].hotspots',
+    pins: [
+      { id: 'd1', label: 'Day vs. Week Toggle',     description: 'Switch between Day and Week view at any time. Week is best for building and reviewing the full schedule. Day gives you a live picture of today\'s staffing — who\'s on shift, their area, and where gaps are.', x: 15, y: 4.5 },
+      { id: 'd2', label: 'Headcount by Position',   description: 'Each position group shows a live headcount badge — green checkmark means you\'re at target, yellow arrow means overstaffed, and a warning icon means you\'re short. Updates instantly as you fill or remove shifts.', x: 92, y: 19 },
+      { id: 'd3', label: 'Area Assignments',        description: 'Assign staff to specific areas or halls within your building — 100 Hall, Cart 1, West Wing, etc. Veras tracks coverage by area so you can see exactly who\'s where at any given time.', x: 43, y: 23 },
+      { id: 'd4', label: 'Open Shift Rows',         description: 'Positions with no staff assigned appear inline as \'+ Add staff.\' Fill them directly from this view, broadcast to staff phones for them to claim, or assign to an agency worker.', x: 17, y: 46 },
+      { id: 'd5', label: 'Shift Details',           description: 'Each row shows the staff member\'s name, credentials, exact shift time, area, and position — all editable directly. No need to navigate away to update a single assignment.', x: 37, y: 23 },
+    ]
+  }
+}
+
+let currentView = 'day'
+
+function switchView(v) {
+  currentView = v
+  document.querySelectorAll('.view-tab').forEach((t, i) => {
+    t.classList.toggle('active', (i === 0 && v === 'week') || (i === 1 && v === 'day'))
+  })
+  const view = VIEWS[v]
+  document.getElementById('schedImg').src = view.imageUrl
+  renderPins()
+}
 
 const wrap = document.getElementById('imageWrap')
 const img  = document.getElementById('schedImg')
 
+function getPins() { return VIEWS[currentView].pins }
+
 function getReadingOrder() {
-  return [...PINS].sort((a, b) => {
+  return [...getPins()].sort((a, b) => {
     const rowA = Math.round(a.y / 5)
     const rowB = Math.round(b.y / 5)
     if (rowA !== rowB) return rowA - rowB
@@ -104,7 +134,7 @@ function getReadingOrder() {
 function renderPins() {
   document.querySelectorAll('.pin').forEach(p => p.remove())
   const ordered = getReadingOrder()
-  PINS.forEach(pin => {
+  getPins().forEach(pin => {
     const num = ordered.indexOf(pin) + 1
     const el = document.createElement('div')
     el.className = 'pin'
@@ -119,15 +149,11 @@ function renderPins() {
 }
 
 function makeDraggable(el, pin) {
-  let startX, startY, startPinX, startPinY
-
   el.addEventListener('mousedown', e => {
     e.preventDefault()
     const rect = img.getBoundingClientRect()
-    startX = e.clientX
-    startY = e.clientY
-    startPinX = pin.x
-    startPinY = pin.y
+    const startX = e.clientX, startY = e.clientY
+    const startPinX = pin.x, startPinY = pin.y
 
     function onMove(e) {
       const dx = ((e.clientX - startX) / rect.width)  * 100
@@ -160,8 +186,9 @@ function updateTable() {
 }
 
 function updateJSON() {
+  const view = VIEWS[currentView]
   const ordered = getReadingOrder()
-  const hotspots = ordered.map((pin, i) => ({
+  const hotspots = ordered.map(pin => ({
     _key: pin.id,
     _type: 'hotspot',
     x: Math.round(pin.x * 10) / 10,
@@ -169,12 +196,12 @@ function updateJSON() {
     label: pin.label,
     description: pin.description,
   }))
+  document.getElementById('patchNote').textContent = `Sanity path: ${view.patchPath}`
   document.getElementById('jsonOut').textContent = JSON.stringify(hotspots, null, 2)
 }
 
 function copyJSON() {
-  const text = document.getElementById('jsonOut').textContent
-  navigator.clipboard.writeText(text).then(() => {
+  navigator.clipboard.writeText(document.getElementById('jsonOut').textContent).then(() => {
     const btn = document.getElementById('copyBtn')
     btn.textContent = 'Copied!'
     btn.classList.add('copied')
@@ -183,7 +210,7 @@ function copyJSON() {
 }
 
 img.addEventListener('load', renderPins)
-if (img.complete) renderPins()
+switchView('day')
 </script>
 </body>
 </html>
