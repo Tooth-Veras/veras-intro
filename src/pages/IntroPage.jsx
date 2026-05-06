@@ -665,7 +665,7 @@ function StepsSlide({ slide }) {
   )
 }
 
-function HotspotSlide({ slide }) {
+function HotspotSlide({ slide, isActive }) {
   const { isDark } = useTheme()
   const views = slide.views || []
   const hasViews = views.length > 1
@@ -683,6 +683,8 @@ function HotspotSlide({ slide }) {
   const viewDescription = currentView ? currentView.description : (slide.body || 'Click each pin to explore.')
   const activeHotspot = activeIdx !== null ? hotspots[activeIdx] : null
   const allExplored = hotspots.length > 0 && viewed.size >= hotspots.length
+
+  useEffect(() => { if (!isActive) closeHotspot() }, [isActive])
 
   function switchView(i) { setActiveView(i); setActiveIdx(null); setPopupAnchor(null); setViewed(new Set()); pinRefs.current = [] }
   function openHotspot(i) {
@@ -1017,7 +1019,7 @@ function BadgeSlide({ slide }) {
   )
 }
 
-function renderSlide(slide, checked, onToggle) {
+function renderSlide(slide, checked, onToggle, isActive) {
   if (!slide) return null
   switch (slide.type) {
     case 'cover':      return <CoverSlide slide={slide} />
@@ -1026,7 +1028,7 @@ function renderSlide(slide, checked, onToggle) {
     case 'phones':     return <PhonesSlide slide={slide} />
     case 'statement':  return <StatementSlide slide={slide} />
     case 'steps':      return <StepsSlide slide={slide} />
-    case 'hotspot':    return <HotspotSlide slide={slide} />
+    case 'hotspot':    return <HotspotSlide slide={slide} isActive={isActive} />
     case 'support':    return <SupportSlide />
     case 'checklist':  return <ChecklistSlide slide={slide} checked={checked} onToggle={onToggle} />
     case 'badge':      return <BadgeSlide slide={slide} />
@@ -1183,7 +1185,7 @@ export default function IntroPage() {
               paddingBottom: 72,
               background: isDark ? 'linear-gradient(135deg, #1e1035 0%, #0f172a 100%)' : 'linear-gradient(135deg, #ede9fe 0%, #f8fafc 40%, #e0f2fe 100%)',
             }}>
-              {renderSlide(s, checklistChecked, j => setChecklistChecked(prev => prev.includes(j) ? prev.filter(x => x !== j) : [...prev, j]))}
+              {renderSlide(s, checklistChecked, j => setChecklistChecked(prev => prev.includes(j) ? prev.filter(x => x !== j) : [...prev, j]), i === slideIndex)}
             </div>
           ))}
         </div>
